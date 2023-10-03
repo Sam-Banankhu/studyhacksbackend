@@ -12,4 +12,3 @@ flask_login
 openai
 pillow
 pytesseract
-dotenv
