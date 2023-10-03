@@ -195,57 +195,148 @@
 
             <!-- User Login -->
             <section>
-                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/login</h3>
-                <p>Authenticate and log in a user, providing an access token.</p>
+                <h3>Authenticate and log in a user, providing an access token</h3>
+                <p class="method">POST https://api-docs-studyhacks.onrender.com/login</p>
+               
                 <pre>
                     <code>
-                        Request Body:
+                        ## User Login
+                        - **URL**: `/login`
+                        - **Method**: `POST`
+                        
+                        ### Request Body
+                        
+                        - `email` (string, required): The email address of the user.
+                        - `password` (string, required): The password for the user account.
+                        
+                        Example Request Body:
+                        
+                        ```json
                         {
                             "email": "user@example.com",
                             "password": "password"
                         }
-                        Response:
+                        
+                        
+                        Responses
+                        
+                        200 OK: Login successful. Returns the 
+                        user's information and an access token.
+
+                        Response Body:
+                        json
+                        Copy code
                         {
                             "msg": "Login successful",
                             "access_token": "your_access_token",
                             "user": {
-                                "user_id": "user_id",
+                                "email": "user@example.com",
+                                "name": "John Doe",
+                                "role": "user",
                                 "profile_complete": true,
-                                "profile_picture": "https://example.com/photo.jpg",
-                                "email": "user@example.com"
+                                "profile_picture": "https://example.com/profile.jpg",
+                                "password": "password",
+                                "country": "United States",
+                                "gender": "Male",
+                                "institution": "Example University",
+                                "mobile": "+1234567890"
                             }
                         }
+                        400 Bad Request: Missing or invalid email or password.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "Email and password are required"
+                        }
+                        401 Unauthorized: Invalid credentials.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "Invalid credentials"
+                        }
+
                     </code>
                 </pre>
             </section>
 
             <!-- Get All Users -->
             <section>
-                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/users</h3>
-                <p>Get a list of all users.</p>
+                <h3>Get a list of all users.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/users</p>
+                
                 <pre>
                     <code>
+                        Request
+
+                        Method: GET
+                        Authentication: Requires a valid JWT (JSON Web Token) access token.
+                    </code>
+                    <code>
                         Response:
+                        
                         [
-                            {
-                                "user_id": "user_id",
-                                "name": "John Doe",
-                                "email": "user@example.com",
-                                "role": "user",
-                                "profile_complete": true,
-                                "profile_picture": "https://example.com/photo.jpg"
-                            },
-                            // More user objects...
-                        ]
+                        {
+                            "_id": "user_id1",  // Replace with the actual user ID
+                            "name": "John Doe",
+                            "email": "user@example.com",
+                            "role": "user",
+                            "profile_complete": true,
+                            "profile_picture": "https://example.com/profile.jpg",
+                            "country": "United States",
+                            "gender": "Male",
+                            "institution": "Example University",
+                            "mobile": "+1234567890"
+                        },
+                        {
+                            "_id": "user_id2",  // Replace with the actual user ID
+                            "name": "Jane Smith",
+                            "email": "jane@example.com",
+                            "role": "user",
+                            "profile_complete": true,
+                            "profile_picture": "https://example.com/profile2.jpg",
+                            "country": "Canada",
+                            "gender": "Female",
+                            "institution": "Another University",
+                            "mobile": "+9876543210"
+                        },
+                        // More user objects...
+                    ]
+                    
+
                     </code>
                 </pre>
             </section>
 
             <!-- User Logout -->
             <section>
-                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/logout</h3>
-                <p>Log out the current user.</p>
+                <h3>Log out the current user</h3>
+                <p class="method">POST https://api-docs-studyhacks.onrender.com/logout</p>
+                
                 <pre>
+                    <code>
+
+                        
+                        Log out the current user. Authentication and a valid JWT
+                         (JSON Web Token) access token are required to access this endpoint.
+
+                        Request
+                        Method: POST
+                        Authentication: Requires a valid JWT access token.
+                        Authorization Header: Include the JWT
+                        access token in the Authorization header.
+
+                        Response
+                        Status Codes:
+                        200 OK - Successful user logout.
+                        401 Unauthorized - Authentication failure.
+                        Successful Logout (Status Code: 200)
+                        Upon successful user logout, the server responds 
+                        with a JSON message confirming the 
+                    </code>
                     <code>
                         Response:
                         {
@@ -260,6 +351,29 @@
                 <h3 class="method">GET https://api-docs-studyhacks.onrender.com/users/&lt;user_id&gt;</h3>
                 <p>Get user details by user ID.</p>
                 <pre>
+                    <code>
+                        Retrieve user details by user ID. Authentication and a
+                         valid JWT (JSON Web Token) access token are required to 
+                         access this endpoint.
+                        
+                        Request
+
+                        Method: GET
+                        URL Parameter:
+                        id (string): The unique identifier of the user.
+                        Authentication: Requires a valid JWT access token.
+                        Authorization Header: Include the JWT access 
+                        token in the Authorization header.
+
+                        Response
+                        Status Codes:
+                        200 OK - Successful retrieval of user details.
+                        404 Not Found - User with the specified ID does not exist.
+                        401 Unauthorized - Authentication failure.
+                        Successful Retrieval (Status Code: 200)
+                        Upon successful retrieval of user details, the server 
+                        responds with a JSON object containing the user's information.
+                    </code>
                     <code>
                         Response:
                         {
@@ -308,8 +422,7 @@
                     <code>
                         Request Form data:
                         {
-                            "file": "your file here",
-                            "new_password": "new_password"
+                            "file": "your file here"
                         }
                         Request Header:
                         {
@@ -350,7 +463,7 @@
 
             <!-- Download PDF File -->
             <section>
-                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/pdfs/download/&lt;pdf_id&gt;</h3>
+                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/files/download/&lt;pdf_id&gt;</h3>
                 <p>Download a processed PDF file.</p>
                 <pre>
                     <code>
@@ -394,11 +507,34 @@
                     </code>
                 </pre>
             </section>
-
+            <section>
+                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/chats/&lt;image_id&gt;</h3>
+                <p>Create a chat based on an image.</p>
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Request Body:
+                        {
+                            "question": "ask a question here?"
+                        }
+                        Response:
+                        {
+                            "msg": "Chat created successfully",
+                            "question": "question",
+                            "answer": "The answer is here",
+                            "image_id": "image_id"
+                        }
+                    </code>
+                </pre>
+            </section>
             <!-- Get All Chats -->
             <section>
-                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/chats</h3>
-                <p>Get a list of all chats created by the current user.</p>
+                <h3>Get a list of all chats created by the current user.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/chats</p>
+                
                 <pre>
                     <code>
                         Request Header:
@@ -411,7 +547,7 @@
                                 "_id": "chat_id",
                                 "question": "What is the answer?",
                                 "answer": "The answer is...",
-                                "pdf_id": "pdf_id",
+                                "pdf_id/image_id": "pdf_id/image_id",
                                 "timestamp": "2023-09-14T12:34:56.789Z"
                             },
                             // More chat objects...
@@ -422,8 +558,9 @@
 
             <!-- Get Chat by ID -->
             <section>
-                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</h3>
-                <p>Get a specific chat by ID.</p>
+                <h3>Get a specific chat by ID.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</p>
+              
                 <pre>
                     <code>
                         Request Header:
@@ -446,8 +583,9 @@
 
             <!-- Get Chats by PDF ID -->
             <section>
-                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/chats/pdf/&lt;pdf_id&gt;</h3>
-                <p>Retrieve chats associated with a specific PDF document.</p>
+                <h3>Retrieve chats associated with a specific PDF document.</h3>
+                <p>GET https://api-docs-studyhacks.onrender.com/chats/pdf/&lt;pdf_id&gt;</p>
+                
                 <pre>
                     <code>
                         Request Header:
@@ -471,8 +609,9 @@
 
             <!-- Update Chat by ID -->
             <section>
-                <h3 class="method">PUT https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</h3>
-                <p>Update a specific chat by ID.</p>
+                <h3>Update a specific chat by ID.</h3>
+                <p class="method">PUT https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</p>
+               
                 <pre>
                     <code>
                         Request Header:
@@ -493,8 +632,9 @@
 
             <!-- Delete Chat by ID -->
             <section>
-                <h3 class="method">DELETE https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</h3>
-                <p>Delete a specific chat by ID.</p>
+                <h3>Delete a specific chat by ID</h3>
+                <p class="method">DELETE https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</p>
+               
                 <pre>
                     <code>
                         Request Header:
@@ -516,9 +656,12 @@
 
             <!-- Create Summary -->
             <section>
-                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/summary</h3>
-                <p>Generate a summary from the provided text data.</p>
-                <p>This endpoint generates a summary from text data provided by the user. It requires the user to be authenticated with a valid access token.</p>
+                <h3>Generate a summary from the provided text data.</h3>
+                <p>Generate a summary from the provided text data.</p> class="method">POST https://api-docs-studyhacks.onrender.com/summary</>
+                
+                <p>This endpoint generates a summary from text 
+                    data provided by the user. It requires the user 
+                    to be authenticated with a valid access token.</p>
                 <pre>
                     <code>
                         Request Header:
@@ -527,7 +670,8 @@
                         }
                         Request Body:
                         {
-                            "text_data": "The text data from which you want to create a summary."
+                            "text_data": "The text data from which 
+                            you want to create a summary."
                         }
                         Response:
                         {
@@ -540,9 +684,12 @@
 
             <!-- Create Summary from PDF -->
             <section>
-                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/summary/&lt;pdf_id&gt;</h3>
+                <h3>Generate a summary from a PDF document using its unique identifier.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/summary/&lt;pdf_id&gt;</p>
                 <p>Generate a summary from a PDF document using its unique identifier.</p>
-                <p>This endpoint generates a summary from a PDF document specified by its unique identifier (`pdf_id`). It requires the user to be authenticated with a valid access token.</p>
+                <p>This endpoint generates a summary from a
+                     PDF document specified by its unique identifier (`pdf_id`).
+                      It requires the user to be authenticated with a valid access token.</p>
                 <pre>
                     <code>
                         Request Header:
