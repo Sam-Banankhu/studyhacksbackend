@@ -10,3 +10,4 @@ PyPDF2
 flask_bcrypt
 flask_login
 openai
+pytesseract
