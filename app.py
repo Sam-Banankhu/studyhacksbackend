@@ -15,9 +15,9 @@ import PyPDF2
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
-from dotenv import load_dotenv 
-# Load environment variables from .env file
-load_dotenv()
+# from dotenv import load_dotenv 
+# # Load environment variables from .env file
+# load_dotenv()
 
 import openai
 # Set your OpenAI API key
