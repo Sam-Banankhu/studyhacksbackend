@@ -10,5 +10,6 @@ PyPDF2
 flask_bcrypt
 flask_login
 openai
+pillow
 pytesseract
 dotenv
