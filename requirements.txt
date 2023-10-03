@@ -11,3 +11,4 @@ flask_bcrypt
 flask_login
 openai
 pytesseract
+dotenv
