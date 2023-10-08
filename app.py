@@ -115,8 +115,7 @@ def register_user():
         "profile_picture":profile_picture,
         "country": country,
          "gender":gender,
-    "institution":institution
-        
+    "institution":institution  
     }
 
     # Insert the user document into the database
@@ -154,7 +153,7 @@ def login():
 
 #  getting all users of the system . attach token in the request header# 
 @app.route('/users', methods=['GET'])
-@login_required
+# @login_required
 @jwt_required()
 def get_all_users():
     users = list(users_collection.find())
@@ -165,7 +164,7 @@ def get_all_users():
 
 
 @app.route('/users/<string:user_id>', methods=['GET'])
-@login_required
+# @login_required
 @jwt_required()
 def get_single_user(user_id):
     try:
@@ -192,7 +191,7 @@ def get_single_user(user_id):
 # no infor provided .. it will get user id from server session
 @app.route('/logout',methods=['POST']) 
 @jwt_required()
-@login_required
+# @login_required
 def logout():
     logout_user()
     return jsonify({'msg': 'Logged out successfully'}), 200
@@ -200,7 +199,7 @@ def logout():
 # FINDALLS
 
 @app.route('/users/<string:_id>', methods=['GET'])
-@login_required
+# @login_required
 @jwt_required()
 def get_user(_id):
     user = users_collection.find_one({'_id': _id})
@@ -218,7 +217,7 @@ def get_user(_id):
 # provide current_password and new_password
 @app.route('/change_password', methods=['POST'])
 @jwt_required()
-@login_required
+# @login_required
 def change_password():
     data = request.get_json()
     current_password = data.get('current_password')
@@ -244,9 +243,9 @@ def change_password():
 # uploading a pdf file to the server append the file and token in the header
 @app.route('/pdfs', methods=['POST'])
 @jwt_required()
-@login_required
+# @login_required
 def upload_pdf():
-    print(request.files)
+    print(request)
     if 'file' not in request.files:
         return "No file part", 400
     
@@ -273,7 +272,7 @@ def upload_pdf():
 
 @app.route('/images', methods=['POST'])
 @jwt_required()
-@login_required
+# @login_required
 def upload_image():
     if 'file' not in request.files:
         return "No file part", 400
@@ -303,7 +302,7 @@ def upload_image():
 
 @app.route('/text', methods=['POST'])
 @jwt_required()
-@login_required
+# @login_required
 def upload_text():
     data = request.get_json()
     text=data['text']
@@ -325,7 +324,6 @@ def upload_text():
 
 @app.route('/text', methods=['GET'])
 @jwt_required()
-@login_required
 def get_files():
     documents_list = list(content_collection.find())
     files_list = []
@@ -340,7 +338,7 @@ def get_files():
 # getting all pdf files from server append  token in the header
 @app.route('/pdfs', methods=['GET'])
 @jwt_required()
-@login_required
+# @login_required
 def get_pdfs():
     documents_list = list(content_collection.find())
     files_list = []
@@ -353,7 +351,7 @@ def get_pdfs():
 
 @app.route('/images', methods=['GET'])
 @jwt_required()
-@login_required
+# @login_required
 def get_images():
     documents_list = list(content_collection.find())
     files_list = []
@@ -367,7 +365,7 @@ def get_images():
 
 @app.route('/pdf_images_text', methods=['GET'])
 @jwt_required()
-@login_required
+# @login_required
 def get_all_contents():
     documents_list = list(content_collection.find())
     files_list = []
@@ -396,7 +394,7 @@ def download_file(_id):
 # add  chat to server append  token in the header and pdf id
 @app.route("/chats/<string:pdf_id>", methods=["POST"])
 @jwt_required()
-@login_required
+# @login_required
 def create_chat(pdf_id):
     data = request.get_json()
     question=data["question"]
@@ -424,7 +422,7 @@ def create_chat(pdf_id):
 
 @app.route("/sammary/<string:pdf_id>", methods=["GET"])
 @jwt_required()
-@login_required
+# @login_required
 def create_sammary(pdf_id):
     document = content_collection.find_one({"_id": pdf_id})
     context=document['extracted_text']
@@ -440,7 +438,7 @@ def create_sammary(pdf_id):
 
 @app.route("/sammary>", methods=["POST"])
 @jwt_required()
-@login_required
+# @login_required
 def create_sammary_text(pdf_id):
     data = request.get_json()
     document = content_collection.find_one({"_id": pdf_id})
@@ -456,7 +454,7 @@ def create_sammary_text(pdf_id):
 
 @app.route("/chats", methods=["GET"])
 @jwt_required()
-@login_required
+# @login_required
 def get_chats():
     user_id = current_user.id
     chats = list(chats_collection.find({'user_id': user_id}))
@@ -473,7 +471,7 @@ def get_chats():
 # Get a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["GET"])
 @jwt_required()
-@login_required
+# @login_required
 def get_chat(chat_id):
     _id = current_user.id
     chat = chats_collection.find_one({"_id": chat_id, 'user_id': _id})
@@ -489,7 +487,7 @@ def get_chat(chat_id):
 #  update a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["PUT"])
 @jwt_required()
-@login_required
+# @login_required
 def update_chat(chat_id):
     _id = current_user.id
     data = request.get_json()
@@ -505,7 +503,7 @@ def update_chat(chat_id):
 # delete a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["DELETE"])
 @jwt_required()
-@login_required
+# @login_required
 def delete_chat(chat_id):
     _id = current_user.id
     result = chats_collection.delete_one({"_id": chat_id, 'user_id': _id})
