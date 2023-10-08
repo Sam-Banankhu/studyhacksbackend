@@ -72,7 +72,7 @@ def load_user(_id):
 # Docomention
 @app.route('/')
 def index():
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], "studyhacks-docs.pdf")
+	file_path = os.path.join(app.config['UPLOAD_FOLDER'], "studyhacks-docs.pdf")
 	return send_file(file_path)
 # USER MANAGEMENT ENDPOINTS
 # registering user provide email(string), password(string), role(string),profile_complete(boolean)
