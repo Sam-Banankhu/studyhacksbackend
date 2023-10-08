@@ -15,9 +15,9 @@ import PyPDF2
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
-from dotenv import load_dotenv 
-# Load environment variables from .env file
-load_dotenv()
+# from dotenv import load_dotenv 
+# # Load environment variables from .env file
+# load_dotenv()
 
 import openai
 # Set your OpenAI API key
@@ -30,7 +30,7 @@ openai.api_key = api_key
 
 
 app = Flask(__name__)
-app.secret_key = "HSHSHSHSSHHS"
+app.secret_key = "HSHSHSHSSHH"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 # Initialize Flask-Bcrypt
 bcrypt = Bcrypt(app)
