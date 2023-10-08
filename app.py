@@ -164,6 +164,26 @@ def get_all_users():
     return jsonify(users), 200
 
 
+@app.route('/users/<string:user_id>', methods=['GET'])
+@login_required
+@jwt_required()
+def get_single_user(user_id):
+    try:
+        # Convert the user_id to an ObjectId
+        object_id = ObjectId(user_id)
+    except Exception as e:
+        return jsonify({"message": "Invalid user_id format"}), 400
+
+    # Query the MongoDB collection for the user with the specified ObjectId
+    user = users_collection.find_one({"_id": object_id})
+
+    if user is None:
+        return jsonify({"message": "User not found"}), 404
+
+    # Convert the ObjectId to a string for the response
+    user['_id'] = str(user['_id'])
+
+    return jsonify(user), 200
 
 
 
