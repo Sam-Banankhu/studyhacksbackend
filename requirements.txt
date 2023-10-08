@@ -8,7 +8,8 @@ flask_jwt_extended
 uuid
 PyPDF2
 flask_bcrypt
+flask_cors
 flask_login
 openai
-pillow
 pytesseract
+dotenv
