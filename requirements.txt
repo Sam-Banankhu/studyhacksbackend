@@ -12,4 +12,3 @@ flask_cors
 flask_login
 openai
 pytesseract
-dotenv
