@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDYHACKS PI Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 36px;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-top: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-top: 15px;
+        }
+
+        p {
+            font-size: 16px;
+            margin-top: 5px;
+        }
+
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        code {
+            font-family: Consolas, Monaco, Courier New, monospace;
+            font-size: 14px;
+        }
+
+        hr {
+            margin-top: 20px;
+            border: none;
+            border-top: 1px solid #ccc;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #777;
+        }
+
+        /* Styling for endpoints and methods */
+        .endpoint {
+            margin-top: 20px;
+        }
+
+        .method {
+            font-weight: bold;
+        }
+
+        .study {
+            font-family: 'YourHandwrittenFont', cursive;
+            font-size: 36px;
+            margin: 0;
+            font-weight: light;
+        }
+        /* Styling for response examples */
+        .response-example {
+            background-color: #e6f7ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .xyx{
+            font-family: Arial, sans-serif; /* Use a fallback font */
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+       
+    </style>
+</head>
+<body>
+    <header>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=YourHandwrittenFont">
+        <div><h1 class='study'>StudyHacks</h1><div class='xyx'> { API Documentation }</div></div>
+        <h3>Welcome to the StudyHacks API documentation. Learn how to use our API for your study needs.</h3>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=YourHandwrittenFont">
+    </header>
+
+    <main>
+        <!-- User Management Endpoints -->
+        <section class="endpoint">
+            <h2>User Management Endpoints</h2>
+            
+            <!-- Register User -->
+            <section>
+                <h3>Register a new user</h3>
+                <p class="method">POST https://api-docs-studyhacks.onrender.com/register</p>
+                
+                <pre>
+                    <code>
+                        ## Register User
+
+                        Registers a new user in the system.
+                        
+                        - **URL**: `/register`
+                        - **Method**: `POST`
+                        
+                        ### Request Body
+                        
+                        - `email` (string, required): The email address of the user.
+                        - `name` (string): The name of the user.
+                        - `role` (string): The role of the user (e.g., "user", "admin").
+                        - `profile_complete` (boolean): Indicates whether the user's profile is complete.
+                        - `profile_picture` (string): URL of the user's profile picture.
+                        - `password` (string, required): The password for the user account.
+                        - `country` (string): The user's country.
+                        - `gender` (string): The user's gender.
+                        - `institution` (string): The user's institution or organization.
+                        - `mobile` (string): The user's mobile phone number.
+                        
+                        Example Request Body:
+                        
+                        ```json
+                        {
+                            "email": "user@example.com",
+                            "name": "John Doe",
+                            "role": "user",
+                            "profile_complete": true,
+                            "profile_picture": "https://example.com/profile.jpg",
+                            "password": "password",
+                            "country": "United States",
+                            "gender": "Male",
+                            "institution": "Example University",
+                            "mobile": "+1234567890"
+                        }
+
+
+                        Responses
+
+
+                        201 Created: User registered successfully.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "User registered successfully"
+                        }
+                        400 Bad Request: Missing or invalid email or password.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "Email and password are required"
+                        }
+                        400 Bad Request: User with the same email already exists.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "User already exists"
+                        }
+                                                
+                    </code>
+                </pre>
+            </section>
+
+            <!-- User Login -->
+            <section>
+                <h3>Authenticate and log in a user, providing an access token</h3>
+                <p class="method">POST https://api-docs-studyhacks.onrender.com/login</p>
+               
+                <pre>
+                    <code>
+                        ## User Login
+                        - **URL**: `/login`
+                        - **Method**: `POST`
+                        
+                        ### Request Body
+                        
+                        - `email` (string, required): The email address of the user.
+                        - `password` (string, required): The password for the user account.
+                        
+                        Example Request Body:
+                        
+                        ```json
+                        {
+                            "email": "user@example.com",
+                            "password": "password"
+                        }
+                        
+                        
+                        Responses
+                        
+                        200 OK: Login successful. Returns the 
+                        user's information and an access token.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "Login successful",
+                            "access_token": "your_access_token",
+                            "user": {
+                                "email": "user@example.com",
+                                "name": "John Doe",
+                                "role": "user",
+                                "profile_complete": true,
+                                "profile_picture": "https://example.com/profile.jpg",
+                                "password": "password",
+                                "country": "United States",
+                                "gender": "Male",
+                                "institution": "Example University",
+                                "mobile": "+1234567890"
+                            }
+                        }
+                        400 Bad Request: Missing or invalid email or password.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "Email and password are required"
+                        }
+                        401 Unauthorized: Invalid credentials.
+
+                        Response Body:
+                        json
+                        Copy code
+                        {
+                            "msg": "Invalid credentials"
+                        }
+
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Get All Users -->
+            <section>
+                <h3>Get a list of all users.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/users</p>
+                
+                <pre>
+                    <code>
+                        Request
+
+                        Method: GET
+                        Authentication: Requires a valid JWT (JSON Web Token) access token.
+                    </code>
+                    <code>
+                        Response:
+                        
+                        [
+                        {
+                            "_id": "user_id1",  // Replace with the actual user ID
+                            "name": "John Doe",
+                            "email": "user@example.com",
+                            "role": "user",
+                            "profile_complete": true,
+                            "profile_picture": "https://example.com/profile.jpg",
+                            "country": "United States",
+                            "gender": "Male",
+                            "institution": "Example University",
+                            "mobile": "+1234567890"
+                        },
+                        {
+                            "_id": "user_id2",  // Replace with the actual user ID
+                            "name": "Jane Smith",
+                            "email": "jane@example.com",
+                            "role": "user",
+                            "profile_complete": true,
+                            "profile_picture": "https://example.com/profile2.jpg",
+                            "country": "Canada",
+                            "gender": "Female",
+                            "institution": "Another University",
+                            "mobile": "+9876543210"
+                        },
+                        // More user objects...
+                    ]
+                    
+
+                    </code>
+                </pre>
+            </section>
+
+            <!-- User Logout -->
+            <section>
+                <h3>Log out the current user</h3>
+                <p class="method">POST https://api-docs-studyhacks.onrender.com/logout</p>
+                
+                <pre>
+                    <code>
+
+                        
+                        Log out the current user. Authentication and a valid JWT
+                         (JSON Web Token) access token are required to access this endpoint.
+
+                        Request
+                        Method: POST
+                        Authentication: Requires a valid JWT access token.
+                        Authorization Header: Include the JWT
+                        access token in the Authorization header.
+
+                        Response
+                        Status Codes:
+                        200 OK - Successful user logout.
+                        401 Unauthorized - Authentication failure.
+                        Successful Logout (Status Code: 200)
+                        Upon successful user logout, the server responds 
+                        with a JSON message confirming the 
+                    </code>
+                    <code>
+                        Response:
+                        {
+                            "msg": "Logged out successfully"
+                        }
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Get User by ID -->
+            <section>
+                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/users/&lt;user_id&gt;</h3>
+                <p>Get user details by user ID.</p>
+                <pre>
+                    <code>
+                        Retrieve user details by user ID. Authentication and a
+                         valid JWT (JSON Web Token) access token are required to 
+                         access this endpoint.
+                        
+                        Request
+
+                        Method: GET
+                        URL Parameter:
+                        id (string): The unique identifier of the user.
+                        Authentication: Requires a valid JWT access token.
+                        Authorization Header: Include the JWT access 
+                        token in the Authorization header.
+
+                        Response
+                        Status Codes:
+                        200 OK - Successful retrieval of user details.
+                        404 Not Found - User with the specified ID does not exist.
+                        401 Unauthorized - Authentication failure.
+                        Successful Retrieval (Status Code: 200)
+                        Upon successful retrieval of user details, the server 
+                        responds with a JSON object containing the user's information.
+                    </code>
+                    <code>
+                        Response:
+                        {
+                            "user_id": "user_id",
+                            "name": "John Doe",
+                            "email": "user@example.com",
+                            "role": "user",
+                            "profile_complete": true,
+                            "profile_picture": "https://example.com/photo.jpg"
+                        }
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Change User Password -->
+            <section>
+                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/change_password</h3>
+                <p>Change the user's password.</p>
+                <pre>
+                    <code>
+                        Request Body:
+                        {
+                            "current_password": "current_password",
+                            "new_password": "new_password"
+                        }
+                        Response:
+                        {
+                            "msg": "Password updated successfully"
+                        }
+                    </code>
+                </pre>
+            </section>
+        </section>
+
+        <hr>
+
+        <!-- PDF Processing Endpoints -->
+        <section class="endpoint">
+            <h2>PDF Processing Endpoints</h2>
+
+            <!-- Upload PDF File -->
+            <section>
+                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/pdfs</h3>
+                <p>Upload a PDF file for processing.</p>
+                <pre>
+                    <code>
+                        Request Form data:
+                        {
+                            "file": "your file here"
+                        }
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        {
+                            "msg": "Document processed successfully"
+                        }
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Get All PDF Files -->
+            <section>
+                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/pdfs</h3>
+                <p>Get a list of all processed PDF files.</p>
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        [
+                            {
+                                "user_id": "user_id",
+                                "pdf_name": "document1.pdf",
+                                "chat_ids": [],
+                                "timestamp": "2023-09-14T12:34:56.789Z",
+                                "extracted_text": "This is the extracted text."
+                            },
+                            // More PDF objects...
+                        ]
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Download PDF File -->
+            <section>
+                <h3 class="method">GET https://api-docs-studyhacks.onrender.com/files/download/&lt;pdf_id&gt;</h3>
+                <p>Download a processed PDF file.</p>
+                <pre>
+                    <code>
+                        
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                    </code>
+                </pre>
+            </section>
+        </section>
+
+        <hr>
+
+        <!-- Chat Processing Endpoints -->
+        <section class="endpoint">
+            <h2>Chat Processing Endpoints</h2>
+
+            <!-- Create Chat -->
+            <section>
+                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/chats/&lt;pdf_id&gt;</h3>
+                <p>Create a chat based on a PDF document.</p>
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Request Body:
+                        {
+                            "question": "ask a question here?"
+                        }
+                        Response:
+                        {
+                            "msg": "Chat created successfully",
+                            "question": "question",
+                            "answer": "The answer is here",
+                            "pdf_id": "pdf_id"
+                        }
+                    </code>
+                </pre>
+            </section>
+            <section>
+                <h3 class="method">POST https://api-docs-studyhacks.onrender.com/chats/&lt;image_id&gt;</h3>
+                <p>Create a chat based on an image.</p>
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Request Body:
+                        {
+                            "question": "ask a question here?"
+                        }
+                        Response:
+                        {
+                            "msg": "Chat created successfully",
+                            "question": "question",
+                            "answer": "The answer is here",
+                            "image_id": "image_id"
+                        }
+                    </code>
+                </pre>
+            </section>
+            <!-- Get All Chats -->
+            <section>
+                <h3>Get a list of all chats created by the current user.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/chats</p>
+                
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        [
+                            {
+                                "_id": "chat_id",
+                                "question": "What is the answer?",
+                                "answer": "The answer is...",
+                                "pdf_id/image_id": "pdf_id/image_id",
+                                "timestamp": "2023-09-14T12:34:56.789Z"
+                            },
+                            // More chat objects...
+                        ]
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Get Chat by ID -->
+            <section>
+                <h3>Get a specific chat by ID.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</p>
+              
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        {
+                            "chat": {
+                                "_id": "chat_id",
+                                "question": "What is the answer?",
+                                "answer": "The answer is...",
+                                "pdf_id": "pdf_id",
+                                "timestamp": "2023-09-14T12:34:56.789Z"
+                            }
+                        }
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Get Chats by PDF ID -->
+            <section>
+                <h3>Retrieve chats associated with a specific PDF document.</h3>
+                <p>GET https://api-docs-studyhacks.onrender.com/chats/pdf/&lt;pdf_id&gt;</p>
+                
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        [
+                            {
+                                "_id": "chat_id",
+                                "question": "What is the answer?",
+                                "answer": "The answer is...",
+                                "pdf_id": "pdf_id",
+                                "timestamp": "2023-09-14T12:34:56.789Z"
+                            },
+                            // More chat objects...
+                        ]
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Update Chat by ID -->
+            <section>
+                <h3>Update a specific chat by ID.</h3>
+                <p class="method">PUT https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</p>
+               
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Request Body:
+                        {
+                            // Updated chat data
+                        }
+                        Response:
+                        {
+                            "msg": "Chat updated successfully"
+                        }
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Delete Chat by ID -->
+            <section>
+                <h3>Delete a specific chat by ID</h3>
+                <p class="method">DELETE https://api-docs-studyhacks.onrender.com/chats/&lt;chat_id&gt;</p>
+               
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        {
+                            "msg": "Chat deleted successfully"
+                        }
+                    </code>
+                </pre>
+            </section>
+        </section>
+
+        <!-- Summary Processing Endpoints -->
+        <section class="endpoint">
+            <h2>Summary Processing Endpoints</h2>
+
+            <!-- Create Summary -->
+            <section>
+                <h3>Generate a summary from the provided text data.</h3>
+                <p>Generate a summary from the provided text data.</p> class="method">POST https://api-docs-studyhacks.onrender.com/summary</>
+                
+                <p>This endpoint generates a summary from text 
+                    data provided by the user. It requires the user 
+                    to be authenticated with a valid access token.</p>
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Request Body:
+                        {
+                            "text_data": "The text data from which 
+                            you want to create a summary."
+                        }
+                        Response:
+                        {
+                            "msg": "Summary created successfully",
+                            "summary": "The generated summary text."
+                        }
+                    </code>
+                </pre>
+            </section>
+
+            <!-- Create Summary from PDF -->
+            <section>
+                <h3>Generate a summary from a PDF document using its unique identifier.</h3>
+                <p class="method">GET https://api-docs-studyhacks.onrender.com/summary/&lt;pdf_id&gt;</p>
+                <p>Generate a summary from a PDF document using its unique identifier.</p>
+                <p>This endpoint generates a summary from a
+                     PDF document specified by its unique identifier (`pdf_id`).
+                      It requires the user to be authenticated with a valid access token.</p>
+                <pre>
+                    <code>
+                        Request Header:
+                        {
+                            "Authorization": "Bearer your_access_token"
+                        }
+                        Response:
+                        {
+                            "msg": "Summary created successfully",
+                            "summary": "The generated summary text."
+                        }
+                    </code>
+                </pre>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2023 studyhacks
+    </footer>
+    <br>
+</body>
+</html>

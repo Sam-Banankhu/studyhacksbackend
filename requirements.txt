@@ -1,0 +1,14 @@
+flask
+pymongo
+bson
+datetime
+waitress
+datetime
+flask_jwt_extended
+uuid
+PyPDF2
+flask_bcrypt
+flask_login
+openai
+pillow
+pytesseract
