@@ -170,7 +170,7 @@ def get_all_users():
 def get_single_user(user_id):
     try:
         # Convert the user_id to an ObjectId
-        object_id = ObjectId(user_id)
+        object_id = user_id
     except Exception as e:
         return jsonify({"message": "Invalid user_id format"}), 400
 
