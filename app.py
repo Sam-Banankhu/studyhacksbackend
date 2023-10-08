@@ -5,6 +5,7 @@ from bson import ObjectId
 import datetime
 from waitress import serve
 from datetime import timedelta
+from flask_cors import CORS
 # 
 import pytesseract
 from PIL import Image
@@ -22,7 +23,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import openai
 # Set your OpenAI API key
 api_key = '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'
-backend_url = os.getenv('BACKEND_URL')
+backend_url = "https://api-docs-studyhacks.onrender.com"
 # Initialize the OpenAI API client
 openai.api_key = api_key
 
@@ -30,6 +31,7 @@ openai.api_key = api_key
 
 
 app = Flask(__name__)
+
 app.secret_key = "HSHSHSHSSHH"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 # Initialize Flask-Bcrypt
@@ -46,7 +48,7 @@ db = client["studyhacks"]
 chats_collection = db["chats"]
 users_collection = db["users"]
 content_collection = db["documents"]
-
+CORS(app)
 
 class User(UserMixin):
     def __init__(self, _id):
@@ -82,11 +84,9 @@ def register_user():
     profile_complete = data.get('profile_complete')
     profile_picture = data.get("profile_picture")
     password = data.get('password')
-    country = data.get("country")
     gender=data.get("gender")
     institution=data.get("institution")
     mobile=data.get("mobile")
-    role=data.get("role")
     country=data.get("country")
     data['timestamp']=str(datetime.datetime.now())
     if not email or not password:
@@ -113,7 +113,6 @@ def register_user():
         "profile_complete":profile_complete,
         "profile_picture":profile_picture,
         "country": country,
-        "role":role,
          "gender":gender,
     "institution":institution
         
@@ -226,6 +225,7 @@ def change_password():
 @jwt_required()
 @login_required
 def upload_pdf():
+    print(request.files)
     if 'file' not in request.files:
         return "No file part", 400
     
