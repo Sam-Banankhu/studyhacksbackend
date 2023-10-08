@@ -72,7 +72,8 @@ def load_user(_id):
 # Docomention
 @app.route('/')
 def index():
-    return render_template('documentation.html')
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], "studyhacks-docs.pdf")
+	return send_file(file_path)
 # USER MANAGEMENT ENDPOINTS
 # registering user provide email(string), password(string), role(string),profile_complete(boolean)
 @app.route('/register', methods=['POST'])
