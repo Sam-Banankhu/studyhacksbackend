@@ -450,12 +450,11 @@ def create_sammary(pdf_id):
     return jsonify({"msg": "Chat created successfully", "sammary": answer}), 201
 
 
-@app.route("/sammary>", methods=["POST"])
+@app.route("/sammary", methods=["POST"])
 @jwt_required()
 @login_is_required
-def create_sammary_text(pdf_id):
+def create_sammary_text():
     data = request.get_json()
-    document = content_collection.find_one({"_id": pdf_id})
     context=data['text']
     question = "Create me a sammary"
     response = openai.Completion.create(
