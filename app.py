@@ -22,7 +22,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 
 import openai
 # Set your OpenAI API key
-api_key = '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'
+api_key = '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'
 backend_url = "https://api-docs-studyhacks.onrender.com"
 # Initialize the OpenAI API client
 openai.api_key = api_key
