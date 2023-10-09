@@ -3,7 +3,6 @@ pymongo
 bson
 datetime
 waitress
-datetime
 flask_jwt_extended
 uuid
 PyPDF2
@@ -12,4 +11,4 @@ flask_cors
 flask_login
 openai
 pytesseract
-dotenv
+python-dotenv
