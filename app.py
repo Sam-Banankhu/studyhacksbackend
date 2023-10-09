@@ -29,10 +29,7 @@ backend_url = "https://api-docs-studyhacks.onrender.com"
 openai.api_key = api_key
 
 
-
-
 app = Flask(__name__)
-
 app.secret_key = "HSHSHSHSSHH"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 # Initialize Flask-Bcrypt
