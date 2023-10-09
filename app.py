@@ -5,31 +5,42 @@ from bson import ObjectId
 import datetime
 from waitress import serve
 from datetime import timedelta
+from flask_cors import CORS
 # 
 import pytesseract
+from functools import wraps
 from PIL import Image
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import uuid
 import os
 import PyPDF2
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 
+# all sammaries
+# download 1 pdf
+# all the chats
 # from dotenv import load_dotenv 
 # # Load environment variables from .env file
 # load_dotenv()
 
 import openai
 # Set your OpenAI API key
-api_key = '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'
-backend_url = os.getenv('BACKEND_URL')
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GPT_API= os.getenv('GPT_API')
+
+backend_url = "https://api-docs-studyhacks.onrender.com"
 # Initialize the OpenAI API client
-openai.api_key = api_key
+openai.api_key = GPT_API
 
 
 
 
 app = Flask(__name__)
+
 app.secret_key = "HSHSHSHSSHH"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 # Initialize Flask-Bcrypt
@@ -46,7 +57,7 @@ db = client["studyhacks"]
 chats_collection = db["chats"]
 users_collection = db["users"]
 content_collection = db["documents"]
-
+CORS(app)
 
 class User(UserMixin):
     def __init__(self, _id):
@@ -55,8 +66,14 @@ class User(UserMixin):
 # Initialize Flask-Login and LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "login"
 
+def login_is_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return jsonify({"message": "Authentication required"}), 401
+        return func(*args, **kwargs)
+    return wrapper
 
 # User loader function
 @login_manager.user_loader
@@ -70,7 +87,8 @@ def load_user(_id):
 # Docomention
 @app.route('/')
 def index():
-    return render_template('documentation.html')
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], "studyhacks-docs.pdf")
+    return send_file(file_path)
 # USER MANAGEMENT ENDPOINTS
 # registering user provide email(string), password(string), role(string),profile_complete(boolean)
 @app.route('/register', methods=['POST'])
@@ -82,11 +100,9 @@ def register_user():
     profile_complete = data.get('profile_complete')
     profile_picture = data.get("profile_picture")
     password = data.get('password')
-    country = data.get("country")
     gender=data.get("gender")
     institution=data.get("institution")
     mobile=data.get("mobile")
-    role=data.get("role")
     country=data.get("country")
     data['timestamp']=str(datetime.datetime.now())
     if not email or not password:
@@ -113,10 +129,8 @@ def register_user():
         "profile_complete":profile_complete,
         "profile_picture":profile_picture,
         "country": country,
-        "role":role,
          "gender":gender,
-    "institution":institution
-        
+    "institution":institution  
     }
 
     # Insert the user document into the database
@@ -154,7 +168,7 @@ def login():
 
 #  getting all users of the system . attach token in the request header# 
 @app.route('/users', methods=['GET'])
-@login_required
+@login_is_required
 @jwt_required()
 def get_all_users():
     users = list(users_collection.find())
@@ -164,6 +178,26 @@ def get_all_users():
     return jsonify(users), 200
 
 
+@app.route('/users/<string:user_id>', methods=['GET'])
+@login_is_required
+@jwt_required()
+def get_single_user(user_id):
+    try:
+        # Convert the user_id to an ObjectId
+        object_id = user_id
+    except Exception as e:
+        return jsonify({"message": "Invalid user_id format"}), 400
+
+    # Query the MongoDB collection for the user with the specified ObjectId
+    user = users_collection.find_one({"_id": object_id})
+
+    if user is None:
+        return jsonify({"message": "User not found"}), 404
+
+    # Convert the ObjectId to a string for the response
+    user['_id'] = str(user['_id'])
+
+    return jsonify(user), 200
 
 
 
@@ -172,7 +206,7 @@ def get_all_users():
 # no infor provided .. it will get user id from server session
 @app.route('/logout',methods=['POST']) 
 @jwt_required()
-@login_required
+@login_is_required
 def logout():
     logout_user()
     return jsonify({'msg': 'Logged out successfully'}), 200
@@ -180,7 +214,7 @@ def logout():
 # FINDALLS
 
 @app.route('/users/<string:_id>', methods=['GET'])
-@login_required
+@login_is_required
 @jwt_required()
 def get_user(_id):
     user = users_collection.find_one({'_id': _id})
@@ -191,14 +225,13 @@ def get_user(_id):
     else:
         return jsonify({'message': 'User not found'}), 404
     
-    
-    
+     
     
 # Change user password
 # provide current_password and new_password
 @app.route('/change_password', methods=['POST'])
 @jwt_required()
-@login_required
+@login_is_required
 def change_password():
     data = request.get_json()
     current_password = data.get('current_password')
@@ -224,8 +257,9 @@ def change_password():
 # uploading a pdf file to the server append the file and token in the header
 @app.route('/pdfs', methods=['POST'])
 @jwt_required()
-@login_required
+@login_is_required
 def upload_pdf():
+    print(request)
     if 'file' not in request.files:
         return "No file part", 400
     
@@ -252,7 +286,7 @@ def upload_pdf():
 
 @app.route('/images', methods=['POST'])
 @jwt_required()
-@login_required
+@login_is_required
 def upload_image():
     if 'file' not in request.files:
         return "No file part", 400
@@ -282,7 +316,7 @@ def upload_image():
 
 @app.route('/text', methods=['POST'])
 @jwt_required()
-@login_required
+@login_is_required
 def upload_text():
     data = request.get_json()
     text=data['text']
@@ -304,7 +338,7 @@ def upload_text():
 
 @app.route('/text', methods=['GET'])
 @jwt_required()
-@login_required
+@login_is_required
 def get_files():
     documents_list = list(content_collection.find())
     files_list = []
@@ -319,7 +353,7 @@ def get_files():
 # getting all pdf files from server append  token in the header
 @app.route('/pdfs', methods=['GET'])
 @jwt_required()
-@login_required
+@login_is_required
 def get_pdfs():
     documents_list = list(content_collection.find())
     files_list = []
@@ -332,7 +366,7 @@ def get_pdfs():
 
 @app.route('/images', methods=['GET'])
 @jwt_required()
-@login_required
+@login_is_required
 def get_images():
     documents_list = list(content_collection.find())
     files_list = []
@@ -346,7 +380,7 @@ def get_images():
 
 @app.route('/pdf_images_text', methods=['GET'])
 @jwt_required()
-@login_required
+@login_is_required
 def get_all_contents():
     documents_list = list(content_collection.find())
     files_list = []
@@ -358,7 +392,7 @@ def get_all_contents():
 # download a pdf file from server append  token in the header and pdf id
 @app.route('/files/download/<_id>', methods=['GET'])
 # @jwt_required()
-# @login_required
+# @login_is_required
 def download_file(_id):
     document = content_collection.find_one({"_id": _id})
     if document:
@@ -375,7 +409,7 @@ def download_file(_id):
 # add  chat to server append  token in the header and pdf id
 @app.route("/chats/<string:pdf_id>", methods=["POST"])
 @jwt_required()
-@login_required
+@login_is_required
 def create_chat(pdf_id):
     data = request.get_json()
     question=data["question"]
@@ -403,7 +437,7 @@ def create_chat(pdf_id):
 
 @app.route("/sammary/<string:pdf_id>", methods=["GET"])
 @jwt_required()
-@login_required
+@login_is_required
 def create_sammary(pdf_id):
     document = content_collection.find_one({"_id": pdf_id})
     context=document['extracted_text']
@@ -419,7 +453,7 @@ def create_sammary(pdf_id):
 
 @app.route("/sammary>", methods=["POST"])
 @jwt_required()
-@login_required
+@login_is_required
 def create_sammary_text(pdf_id):
     data = request.get_json()
     document = content_collection.find_one({"_id": pdf_id})
@@ -435,7 +469,7 @@ def create_sammary_text(pdf_id):
 
 @app.route("/chats", methods=["GET"])
 @jwt_required()
-@login_required
+@login_is_required
 def get_chats():
     user_id = current_user.id
     chats = list(chats_collection.find({'user_id': user_id}))
@@ -452,7 +486,7 @@ def get_chats():
 # Get a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["GET"])
 @jwt_required()
-@login_required
+@login_is_required
 def get_chat(chat_id):
     _id = current_user.id
     chat = chats_collection.find_one({"_id": chat_id, 'user_id': _id})
@@ -468,7 +502,7 @@ def get_chat(chat_id):
 #  update a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["PUT"])
 @jwt_required()
-@login_required
+@login_is_required
 def update_chat(chat_id):
     _id = current_user.id
     data = request.get_json()
@@ -484,7 +518,7 @@ def update_chat(chat_id):
 # delete a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["DELETE"])
 @jwt_required()
-@login_required
+@login_is_required
 def delete_chat(chat_id):
     _id = current_user.id
     result = chats_collection.delete_one({"_id": chat_id, 'user_id': _id})
