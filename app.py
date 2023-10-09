@@ -9,6 +9,7 @@ from flask_cors import CORS
 # 
 import pytesseract
 from PIL import Image
+
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 import uuid
 import os
