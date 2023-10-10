@@ -1,5 +1,7 @@
+
 from flask import Flask, jsonify, request, session, redirect, url_for, render_template,send_file,send_from_directory
 from pymongo import MongoClient
+from flask import Flask, session
 from bson import ObjectId
 import datetime
 from waitress import serve
@@ -39,7 +41,7 @@ openai.api_key = GPT_API
 
 
 app = Flask(__name__)
-
+CORS(app,supports_credentials=True)
 app.secret_key = "HSHSHSHSSHH"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 # Initialize Flask-Bcrypt
@@ -56,7 +58,7 @@ db = client["studyhacks"]
 chats_collection = db["chats"]
 users_collection = db["users"]
 content_collection = db["documents"]
-CORS(app)
+sammaries_collection = db["summaries"]
 
 class User(UserMixin):
     def __init__(self, _id):
@@ -69,6 +71,7 @@ login_manager.init_app(app)
 def login_is_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
+        print(request)
         if not current_user.is_authenticated:
             return jsonify({"message": "Authentication required"}), 401
         return func(*args, **kwargs)
@@ -167,9 +170,13 @@ def login():
 
 #  getting all users of the system . attach token in the request header# 
 @app.route('/users', methods=['GET'])
-@login_is_required
 @jwt_required()
 def get_all_users():
+    headers = request.headers
+    for key, value in headers.items():
+        print(f"{key}: {value}")
+    data = request.get_json()
+    print(data)
     users = list(users_collection.find())
     for user in users:
         user['_id'] = str(user['_id'])
@@ -178,7 +185,7 @@ def get_all_users():
 
 
 @app.route('/users/<string:user_id>', methods=['GET'])
-@login_is_required
+# 
 @jwt_required()
 def get_single_user(user_id):
     try:
@@ -205,7 +212,7 @@ def get_single_user(user_id):
 # no infor provided .. it will get user id from server session
 @app.route('/logout',methods=['POST']) 
 @jwt_required()
-@login_is_required
+# 
 def logout():
     logout_user()
     return jsonify({'msg': 'Logged out successfully'}), 200
@@ -213,7 +220,7 @@ def logout():
 # FINDALLS
 
 @app.route('/users/<string:_id>', methods=['GET'])
-@login_is_required
+# 
 @jwt_required()
 def get_user(_id):
     user = users_collection.find_one({'_id': _id})
@@ -230,7 +237,7 @@ def get_user(_id):
 # provide current_password and new_password
 @app.route('/change_password', methods=['POST'])
 @jwt_required()
-@login_is_required
+# 
 def change_password():
     data = request.get_json()
     current_password = data.get('current_password')
@@ -256,7 +263,7 @@ def change_password():
 # uploading a pdf file to the server append the file and token in the header
 @app.route('/pdfs', methods=['POST'])
 @jwt_required()
-@login_is_required
+# 
 def upload_pdf():
     print(request)
     if 'file' not in request.files:
@@ -285,7 +292,7 @@ def upload_pdf():
 
 @app.route('/images', methods=['POST'])
 @jwt_required()
-@login_is_required
+# 
 def upload_image():
     if 'file' not in request.files:
         return "No file part", 400
@@ -315,7 +322,6 @@ def upload_image():
 
 @app.route('/text', methods=['POST'])
 @jwt_required()
-@login_is_required
 def upload_text():
     data = request.get_json()
     text=data['text']
@@ -337,7 +343,6 @@ def upload_text():
 
 @app.route('/text', methods=['GET'])
 @jwt_required()
-@login_is_required
 def get_files():
     documents_list = list(content_collection.find())
     files_list = []
@@ -352,7 +357,7 @@ def get_files():
 # getting all pdf files from server append  token in the header
 @app.route('/pdfs', methods=['GET'])
 @jwt_required()
-@login_is_required
+
 def get_pdfs():
     documents_list = list(content_collection.find())
     files_list = []
@@ -365,7 +370,6 @@ def get_pdfs():
 
 @app.route('/images', methods=['GET'])
 @jwt_required()
-@login_is_required
 def get_images():
     documents_list = list(content_collection.find())
     files_list = []
@@ -379,7 +383,6 @@ def get_images():
 
 @app.route('/pdf_images_text', methods=['GET'])
 @jwt_required()
-@login_is_required
 def get_all_contents():
     documents_list = list(content_collection.find())
     files_list = []
@@ -391,7 +394,7 @@ def get_all_contents():
 # download a pdf file from server append  token in the header and pdf id
 @app.route('/files/download/<_id>', methods=['GET'])
 # @jwt_required()
-# @login_is_required
+# 
 def download_file(_id):
     document = content_collection.find_one({"_id": _id})
     if document:
@@ -408,7 +411,6 @@ def download_file(_id):
 # add  chat to server append  token in the header and pdf id
 @app.route("/chats/<string:pdf_id>", methods=["POST"])
 @jwt_required()
-@login_is_required
 def create_chat(pdf_id):
     data = request.get_json()
     question=data["question"]
@@ -424,6 +426,8 @@ def create_chat(pdf_id):
     answer = response.choices[0].text.strip()
     data['answer']=answer
     data['question']=question
+    data["pdf_id"]= document["_id"]
+    data['type_']='pdf'
     data['timestamp']=str(datetime.datetime.now())
     data['_id']=_id
     data['user_id'] = current_user.id  
@@ -434,40 +438,200 @@ def create_chat(pdf_id):
     return jsonify({"msg": "Chat created successfully",'chat':data}), 201
 
 
-@app.route("/sammary/<string:pdf_id>", methods=["GET"])
+# @app.route("/sammary/<string:pdf_id>", methods=["GET"])
+# @jwt_required()
+# def create_sammary(pdf_id):
+#     # _id : str(ObjectId())
+#     document = content_collection.find_one({"_id": pdf_id})
+#     context=document['extracted_text']
+#     question = "Create me a sammary"
+#     response = openai.Completion.create(
+#         engine="text-davinci-002",
+#         prompt=f"Context: {context}\nQuestion: {question}\nAnswer:",
+#         max_tokens=50  
+#     )
+#     answer = response.choices[0].text.strip()
+   
+#     data={
+#     'sammary':answer,
+#     "pdf_id":str(document["_id"]),
+#     'timestamp':str(datetime.datetime.now()),
+#     '_id':str(ObjectId()),
+#     'user_id' : str(current_user.id)
+#     }
+#     sammary=sammaries_collection.insert_one(data)
+#     return jsonify(sammary), 201
+
+@app.route("/sammary/<string:pdf_id>", methods=["POST"])
 @jwt_required()
-@login_is_required
-def create_sammary(pdf_id):
+def create_sammary1(pdf_id):
+    # Retrieve the document from the content_collection
     document = content_collection.find_one({"_id": pdf_id})
-    context=document['extracted_text']
-    question = "Create me a sammary"
+    context = document['extracted_text']
+    question = "Create me a summary"
+    
+    # Generate a new ObjectId
+    _id = str(ObjectId())
+
+    # Use OpenAI to generate the summary
     response = openai.Completion.create(
         engine="text-davinci-002",
         prompt=f"Context: {context}\nQuestion: {question}\nAnswer:",
         max_tokens=50  
     )
     answer = response.choices[0].text.strip()
-    return jsonify({"msg": "Chat created successfully", "sammary": answer}), 201
+    time=str(datetime.datetime.now())
+    # Create a dictionary with the summary data
+    data = {
+        'sammary': answer,
+        "type": "pdf",
+        "pdf_id": str(document["_id"]),
+        'timestamp':time ,
+        '_id': _id,
+        'user_id': str(current_user.id)
+    }
 
+    # Insert the data into the sammaries_collection
+    sammary = sammaries_collection.insert_one(data)
+
+    # Create a JSON response with the inserted data
+    response_data = {
+        "msg": "Chat created successfully",
+        "sammary": answer
+        
+    }
+
+    return jsonify(response_data), 201
 
 @app.route("/sammary", methods=["POST"])
 @jwt_required()
-@login_is_required
-def create_sammary_text():
+def create_sammary():
     data = request.get_json()
-    context=data['text']
-    question = "Create me a sammary"
+    text=data["text"]
+    # Retrieve the document from the content_collection
+    context = text
+    question = "Create me a summary"
+    # Generate a new ObjectId
+    _id = str(ObjectId())
+    # Use OpenAI to generate the summary
     response = openai.Completion.create(
         engine="text-davinci-002",
         prompt=f"Context: {context}\nQuestion: {question}\nAnswer:",
         max_tokens=50  
     )
     answer = response.choices[0].text.strip()
-    return jsonify({"msg": "Chat created successfully", "sammary": answer}), 201
+    time=str(datetime.datetime.now())
+    # Create a dictionary with the summary data
+    data = {
+        'sammary': answer,
+        "pdf_id": "",
+        "type": "pdf",
+        'timestamp':time ,
+        '_id': _id,
+        'user_id': str(current_user.id)
+    }
+
+    # Insert the data into the sammaries_collection
+    sammary = sammaries_collection.insert_one(data)
+
+    # Create a JSON response with the inserted data
+    response_data = {
+        "msg": "Summary created successfully",
+        "sammary": answer,
+        # "pdf_id": "",
+        # "type": "text",
+        # "timestamp": time,
+        # "user_id": str(current_user.id)
+    }
+
+    return jsonify(response_data), 201
+
+@app.route("/chats", methods=["GET"])
+@jwt_required()  # Assuming you are using JWT authentication
+def get_all_chats():
+    # Retrieve all documents (chats) from the chats_collection
+    chats = chats_collection.find({})
+
+    # Convert the retrieved documents to a list of dictionaries
+    chat_list = [chat for chat in chats]
+
+    # Return the list of chats as a JSON response
+    return jsonify(chat_list), 200 
+
+
+@app.route("/sammary", methods=["GET"])
+def get_summaries():
+    # Retrieve all summaries from the sammaries_collection
+    sammaries = list(sammaries_collection.find())
+
+    # Prepare a list to store the summary data
+    sammary_list = []
+
+    # Iterate through the retrieved summaries and format them
+    for sammary in sammaries:
+        formatted_sammary = {
+            "type": sammary["type"],
+            "sammary_id": str(sammary["_id"]),
+            "sammary": sammary["sammary"],
+            "pdf_id": sammary["pdf_id"],
+            "timestamp": sammary["timestamp"],
+            "user_id": sammary["user_id"]
+        }
+        sammary_list.append(formatted_sammary)
+
+    # Create a JSON response with the list of summaries
+    response_data = {
+        "summaries": sammary_list
+    }
+
+    return jsonify(response_data), 200
+
+
+
+@app.route("/summaries/pdfs/<string:pdf_id>", methods=["GET"])
+@jwt_required()
+def get_summaries_by_pdf_id(pdf_id):
+    # Find summaries that match the provided PDF ID
+    sammaries = sammaries_collection.find({"pdf_id": pdf_id})
+
+    # Prepare a list to store the summary data
+    sammary_list = []
+
+    # Iterate through the retrieved summaries and format them
+    for sammary in sammaries:
+        formatted_sammary = {
+            "sammary_id": str(sammary["_id"]),
+            "sammary": sammary["sammary"],
+            "pdf_id": sammary["pdf_id"],
+            "timestamp": sammary["timestamp"],
+            "user_id": sammary["user_id"]
+        }
+        sammary_list.append(formatted_sammary)
+
+    # Create a JSON response with the list of summaries
+    response_data = {
+        "sammaries": sammary_list
+    }
+
+    return jsonify(response_data), 200
+
+# @app.route("/sammary", methods=["POST"])
+# @jwt_required()
+# def create_sammary_text():
+#     data = request.get_json()
+#     context=data['text']
+#     question = "Create me a sammary"
+#     response = openai.Completion.create(
+#         engine="text-davinci-002",
+#         prompt=f"Context: {context}\nQuestion: {question}\nAnswer:",
+#         max_tokens=50  
+#     )
+    
+#     answer = response.choices[0].text.strip()
+#     return jsonify({"msg": "Chat created successfully", "sammary": answer}), 201
 
 @app.route("/chats", methods=["GET"])
 @jwt_required()
-@login_is_required
 def get_chats():
     user_id = current_user.id
     chats = list(chats_collection.find({'user_id': user_id}))
@@ -479,12 +643,25 @@ def get_chats():
 
 
 
+@app.route("/chats/pdfs/<string:pdf_id>", methods=["GET"])
+@jwt_required()
+def get_chats_by_pdf_id(pdf_id):
+    # Query the chats collection to find chats associated with the specified PDF ID
+    chats = list(chats_collection.find({"pdf_id": pdf_id}))
+
+    # Format the chats, converting ObjectId to strings for JSON serialization
+    formatted_chats = []
+    for chat in chats:
+        chat["_id"] = str(chat["_id"])
+        formatted_chats.append(chat)
+
+    # Return the list of chats as a JSON response
+    return jsonify(formatted_chats), 200
 
 
 # Get a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["GET"])
 @jwt_required()
-@login_is_required
 def get_chat(chat_id):
     _id = current_user.id
     chat = chats_collection.find_one({"_id": chat_id, 'user_id': _id})
@@ -500,7 +677,6 @@ def get_chat(chat_id):
 #  update a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["PUT"])
 @jwt_required()
-@login_is_required
 def update_chat(chat_id):
     _id = current_user.id
     data = request.get_json()
@@ -516,7 +692,6 @@ def update_chat(chat_id):
 # delete a specific chat by ID include chat id and token
 @app.route("/chats/<string:chat_id>", methods=["DELETE"])
 @jwt_required()
-@login_is_required
 def delete_chat(chat_id):
     _id = current_user.id
     result = chats_collection.delete_one({"_id": chat_id, 'user_id': _id})
@@ -556,4 +731,4 @@ def extract_text_from_image(image_path):
         return f"Error: {str(e)}"
     
 if __name__ == "__main__":
-    serve(app, host="0.0.0.0", port=8080)
+    serve(app, host="0.0.0.0", port=8088)
