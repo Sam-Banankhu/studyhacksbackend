@@ -21,22 +21,26 @@ secret_key = "your_secret_key"
 algorithm = "HS256"
 exp= datetime.utcnow() + timedelta(hours=2)
 load_dotenv()
-
+secret = os.getenv('APP_SECRET_KEY')
 GPT_API = os.getenv('GPT_API')
-
+mongo_link = os.getenv('MONGODB_LINK')
+token = os.getenv('AWT_TOKEN')
+secret_key = os.getenv('SECRET_KEY')
+algorithm = os.getenv('AWT_ALGORITHM')
+backend_url = os.getenv('BACKEND_V1')
 backend_url = "https://api-docs-studyhacks.onrender.com"
 openai.api_key = GPT_API
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-app.secret_key = "HSHSHSHSSHH"
+app.secret_key = "gggsgssgs"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 bcrypt = Bcrypt(app)
 
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-client = MongoClient("mongodb+srv://userxyz:userxyz@cluster0.5be8y.mongodb.net/?retryWrites=true&w=majority")
+client = MongoClient(mongo_link)
 db = client["studyhacks"]
 chats_collection = db["chats"]
 users_collection = db["users"]
@@ -66,7 +70,7 @@ def register_user():
     institution = data.get("institution")
     mobile = data.get("mobile")
     country = data.get("country")
-    data['timestamp'] = str(datetime.datetime.now())
+    data['timestamp'] = str(datetime.now())
     if not email or not password:
         return jsonify({'msg': 'Email and password are required'}), 400
 
@@ -242,7 +246,7 @@ def upload_pdf():
         data["chat_ids"] = []
         data["_id"] = _id
         data["path"] = backend_url + '/files/download/' + _id
-        data['timestamp'] = str(datetime.datetime.now())
+        data['timestamp'] = str(datetime.now())
         document = content_collection.insert_one(data)
         return jsonify({"msg": "Document processed successfully"}), 201
 
@@ -280,7 +284,7 @@ def upload_image():
         data["chat_ids"] = []
         data["_id"] = _id
         data["path"] = backend_url + '/files/download/' + _id
-        data['timestamp'] = str(datetime.datetime.now())
+        data['timestamp'] = str(datetime.now())
         document = content_collection.insert_one(data)
         return jsonify({"msg": "Image processed successfully"}), 201
 
@@ -309,7 +313,7 @@ def upload_text():
         data["chat_ids"] = []
         data["_id"] = _id
         data["path"] = ""
-        data['timestamp'] = str(datetime.datetime.now())
+        data['timestamp'] = str(datetime.now())
         document = content_collection.insert_one(data)
         return jsonify({"msg": "Text processed successfully"}), 201
 
@@ -434,7 +438,7 @@ def create_chat(pdf_id):
         data['question'] = question
         data["pdf_id"] = document["_id"]
         data['type_'] = 'pdf'
-        data['timestamp'] = str(datetime.datetime.now())
+        data['timestamp'] = str(datetime.now())
         data['_id'] = _id
         data['user_id'] = user_id
         chats_collection.insert_one(data)
@@ -466,7 +470,7 @@ def create_sammary1(pdf_id):
             max_tokens=50
         )
         answer = response.choices[0].text.strip()
-        time = str(datetime.datetime.now())
+        time = str(datetime.now())
         data = {
             'sammary': answer,
             "type": "pdf",
@@ -506,7 +510,7 @@ def create_sammary():
             max_tokens=50
         )
         answer = response.choices[0].text.strip()
-        time = str(datetime.datetime.now())
+        time = str(datetime.now())
         data = {
             'sammary': answer,
             "pdf_id": "",
