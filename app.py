@@ -33,14 +33,14 @@ openai.api_key = GPT_API
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-app.secret_key = "gggsgssgs"
+app.secret_key = secret
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 bcrypt = Bcrypt(app)
 
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-client = MongoClient(mongo_link)
+client = MongoClient("mongodb+srv://userxyz:userxyz@cluster0.5be8y.mongodb.net/?retryWrites=true&w=majority")
 db = client["studyhacks"]
 chats_collection = db["chats"]
 users_collection = db["users"]
