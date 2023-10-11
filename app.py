@@ -21,19 +21,14 @@ secret_key = "your_secret_key"
 algorithm = "HS256"
 exp= datetime.utcnow() + timedelta(hours=2)
 load_dotenv()
-secret = os.getenv('APP_SECRET_KEY')
+
 GPT_API = os.getenv('GPT_API')
-mongo_link = os.getenv('MONGODB_LINK')
-token = os.getenv('AWT_TOKEN')
-secret_key = os.getenv('SECRET_KEY')
-algorithm = os.getenv('AWT_ALGORITHM')
-backend_url = os.getenv('BACKEND_V1')
-backend_url = "https://api-docs-studyhacks.onrender.com"
+backend_url = "https://api-docs-studyhacks-v1.onrender.com"
 openai.api_key = GPT_API
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
-app.secret_key = secret
+app.secret_key ="srevvhhhff"
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
 bcrypt = Bcrypt(app)
 
@@ -710,7 +705,6 @@ def extract_text_from_pdf(pdf_file_path):
 def get_token(id):
     paylod={
      "id": id,
-      "exp": exp
     }
     token = jwt.encode(paylod, secret_key, algorithm=algorithm)
     return token
