@@ -24,7 +24,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, curren
 # from dotenv import load_dotenv 
 # # Load environment variables from .env file
 # load_dotenv()
-
+id
 import openai
 # Set your OpenAI API key
 from dotenv import load_dotenv
@@ -61,25 +61,21 @@ content_collection = db["documents"]
 sammaries_collection = db["summaries"]
 
 class User(UserMixin):
-    def __init__(self, _id):
-        self.id = _id
+    def __init__(self, user):
+        self.user = user
+    def get_id(self):
+        return str(self.user['_id']) 
 
 # Initialize Flask-Login and LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-def login_is_required(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        print(request)
-        if not current_user.is_authenticated:
-            return jsonify({"message": "Authentication required"}), 401
-        return func(*args, **kwargs)
-    return wrapper
+
 
 # User loader function
 @login_manager.user_loader
 def load_user(_id):
+    print(_id)
     user = users_collection.find_one({'_id': _id})
     if user:
         return User(user['_id'])
@@ -159,7 +155,7 @@ def login():
         return jsonify({'msg': 'Invalid credentials'}), 401
 
 
-    user_obj = User(user['_id'])
+    user_obj = User(user)
     login_user(user_obj)
     access_token = create_access_token(identity=user['_id'],expires_delta=expires_in)
     return jsonify({'msg': 'Login successful', 'access_token': access_token, 'user': user}), 200
@@ -243,14 +239,14 @@ def change_password():
     current_password = data.get('current_password')
     new_password = data.get('new_password')
 
-    user = users_collection.find_one({'_id': current_user.id})
+    user = users_collection.find_one({'_id': current_user.get_id()})
 
     if not user or not bcrypt.check_password_hash(user['password'], current_password):
         return jsonify({'msg': 'Current password is incorrect'}), 401
     
     hashed_new_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
 
-    users_collection.update_one({'_id': current_user.id}, {'$set': {'password': hashed_new_password}})
+    users_collection.update_one({'_id': current_user.get_id()}, {'$set': {'password': hashed_new_password}})
 
     return jsonify({'msg': 'Password updated successfully'}), 200
 
@@ -279,7 +275,7 @@ def upload_pdf():
     file.save(pdf_loc)
     extracted_text = extract_text_from_pdf(pdf_loc)
     data = {}
-    data['user_id']=current_user.id
+    data['user_id']=current_user.get_id()
     data['type_']='pdf'
     data["extracted_text"]=extracted_text
     data["name"]=str(unique_id)+".pdf"
@@ -308,7 +304,7 @@ def upload_image():
     file.save(pdf_loc)
     extracted_text = extract_text_from_image(pdf_loc)
     data = {}
-    data['user_id']=current_user.id
+    data['user_id']=current_user.get_id()
     data['type_']='image'
     data["extracted_text"]=extracted_text
     data["name"]=str(unique_id)+file.filename
@@ -328,7 +324,7 @@ def upload_text():
     unique_id = uuid.uuid4()
     _id = str(ObjectId())
     data = {}
-    data['user_id']=current_user.id
+    data['user_id']=current_user.get_id()
     data['type_']='text'
     data["extracted_text"]=text
     data["name"]=''
@@ -412,6 +408,7 @@ def download_file(_id):
 @app.route("/chats/<string:pdf_id>", methods=["POST"])
 @jwt_required()
 def create_chat(pdf_id):
+    print(current_user.get_id())
     data = request.get_json()
     question=data["question"]
     document = content_collection.find_one({"_id": pdf_id})
@@ -430,7 +427,7 @@ def create_chat(pdf_id):
     data['type_']='pdf'
     data['timestamp']=str(datetime.datetime.now())
     data['_id']=_id
-    data['user_id'] = current_user.id  
+    data['user_id'] = current_user.get_id() 
     chats_collection.insert_one(data)
     content_collection.update_one(
     {"_id": document["_id"]},
@@ -457,7 +454,7 @@ def create_chat(pdf_id):
 #     "pdf_id":str(document["_id"]),
 #     'timestamp':str(datetime.datetime.now()),
 #     '_id':str(ObjectId()),
-#     'user_id' : str(current_user.id)
+#     'user_id' : str(current_user.get_id())
 #     }
 #     sammary=sammaries_collection.insert_one(data)
 #     return jsonify(sammary), 201
@@ -488,7 +485,7 @@ def create_sammary1(pdf_id):
         "pdf_id": str(document["_id"]),
         'timestamp':time ,
         '_id': _id,
-        'user_id': str(current_user.id)
+        'user_id': str(current_user.get_id())
     }
 
     # Insert the data into the sammaries_collection
@@ -528,7 +525,7 @@ def create_sammary():
         "type": "pdf",
         'timestamp':time ,
         '_id': _id,
-        'user_id': str(current_user.id)
+        'user_id': str(current_user.get_id())
     }
 
     # Insert the data into the sammaries_collection
@@ -541,7 +538,7 @@ def create_sammary():
         # "pdf_id": "",
         # "type": "text",
         # "timestamp": time,
-        # "user_id": str(current_user.id)
+        # "user_id": str(current_user.get_id())
     }
 
     return jsonify(response_data), 201
@@ -588,7 +585,7 @@ def get_summaries():
 
 
 
-@app.route("/summaries/pdfs/<string:pdf_id>", methods=["GET"])
+@app.route("/sammaries/pdfs/<string:pdf_id>", methods=["GET"])
 @jwt_required()
 def get_summaries_by_pdf_id(pdf_id):
     # Find summaries that match the provided PDF ID
@@ -633,7 +630,7 @@ def get_summaries_by_pdf_id(pdf_id):
 @app.route("/chats", methods=["GET"])
 @jwt_required()
 def get_chats():
-    user_id = current_user.id
+    user_id = current_user.get_id()
     chats = list(chats_collection.find({'user_id': user_id}))
 
     for chat in chats:
@@ -663,7 +660,7 @@ def get_chats_by_pdf_id(pdf_id):
 @app.route("/chats/<string:chat_id>", methods=["GET"])
 @jwt_required()
 def get_chat(chat_id):
-    _id = current_user.id
+    _id = current_user.get_id()
     chat = chats_collection.find_one({"_id": chat_id, 'user_id': _id})
     if chat:
         chat["_id"] = str(chat["_id"])
@@ -678,7 +675,7 @@ def get_chat(chat_id):
 @app.route("/chats/<string:chat_id>", methods=["PUT"])
 @jwt_required()
 def update_chat(chat_id):
-    _id = current_user.id
+    _id = current_user.get_id()
     data = request.get_json()
     result = chats_collection.update_one({"_id": chat_id, 'user_id': _id}, {"$set": data})
     if result.modified_count == 1:
@@ -693,7 +690,7 @@ def update_chat(chat_id):
 @app.route("/chats/<string:chat_id>", methods=["DELETE"])
 @jwt_required()
 def delete_chat(chat_id):
-    _id = current_user.id
+    _id = current_user.get_id()
     result = chats_collection.delete_one({"_id": chat_id, 'user_id': _id})
     if result.deleted_count == 1:
         return jsonify({"msg": "Chat deleted successfully"}), 200
@@ -731,4 +728,4 @@ def extract_text_from_image(image_path):
         return f"Error: {str(e)}"
     
 if __name__ == "__main__":
-    serve(app, host="0.0.0.0", port=8088)
+    serve(app, host="0.0.0.0", port=8080)
