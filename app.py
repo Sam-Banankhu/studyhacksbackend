@@ -208,6 +208,43 @@ def change_password():
 
         return jsonify({'msg': 'Password updated successfully'}), 200
 
+# @app.route('/pdfs', methods=['POST'])
+# def upload_pdf():
+#     res= authorise_request(request)
+#     if(res=="expired"):
+#         return jsonify({"message": "Token expired"}), 403
+#     elif (res=="invalid"):
+#         return jsonify({"message": "Token is invalid"}),403
+#     elif(res=="not found"):
+#         return jsonify({"message": "Token not found"}),403
+#     elif(res=="revoked"):
+#         return jsonify({"message": "Token is revoked"}),403
+#     else:
+        # # id=res["id"]
+        # if 'file' not in request.files:
+        #     return "No file part", 400
+
+        # file = request.files['file']
+        # if file.filename == '':
+        #     return "No selected file", 400
+
+        # unique_id = uuid.uuid4()
+        # _id = str(ObjectId())
+        # pdf_loc = os.path.join(app.config['UPLOAD_FOLDER'], str(unique_id) + ".pdf")
+        # # file.save(pdf_loc)
+        # extracted_text = extract_text_from_pdf(pdf_loc)
+        # data = {}
+        # data['user_id'] = id
+        # data['type_'] = 'pdf'
+        # data["extracted_text"] = extracted_text
+        # data["name"] = str(unique_id) + ".pdf"
+        # data["chat_ids"] = []
+        # data["_id"] = _id
+        # data["path"] = backend_url + '/files/download/' + _id
+        # data['timestamp'] = str(datetime.now())
+        # document = content_collection.insert_one(data)
+        # return jsonify({"msg": "Document processed successfully"}), 201
+
 @app.route('/pdfs', methods=['POST'])
 def upload_pdf():
     res= authorise_request(request)
@@ -220,30 +257,31 @@ def upload_pdf():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        # id=res["id"]
+        user_id=res["id"]
         if 'file' not in request.files:
             return "No file part", 400
-
+        
         file = request.files['file']
+        
         if file.filename == '':
             return "No selected file", 400
-
+        
         unique_id = uuid.uuid4()
         _id = str(ObjectId())
-        pdf_loc = os.path.join(app.config['UPLOAD_FOLDER'], str(unique_id) + ".pdf")
+        pdf_loc=os.path.join(app.config['UPLOAD_FOLDER'],  str(unique_id)+".pdf")
         file.save(pdf_loc)
         extracted_text = extract_text_from_pdf(pdf_loc)
         data = {}
-        data['user_id'] = id
-        data['type_'] = 'pdf'
-        data["extracted_text"] = extracted_text
-        data["name"] = str(unique_id) + ".pdf"
-        data["chat_ids"] = []
-        data["_id"] = _id
-        data["path"] = backend_url + '/files/download/' + _id
-        data['timestamp'] = str(datetime.now())
+        data['user_id']=user_id
+        data['type_']='pdf'
+        data["extracted_text"]=extracted_text
+        data["name"]=str(unique_id)+".pdf"
+        data["chat_ids"]=[]
+        data["_id"]=_id
+        data["path"]=backend_url+'/files/download/'+_id
+        data['timestamp']=str(datetime.now())
         document = content_collection.insert_one(data)
-        return jsonify({"msg": "Document processed successfully"}), 201
+        return jsonify({"msg": "Document processed successfully"}),201
 
 @app.route('/images', methods=['POST'])
 def upload_image():
@@ -280,7 +318,7 @@ def upload_image():
         data["_id"] = _id
         data["path"] = backend_url + '/files/download/' + _id
         data['timestamp'] = str(datetime.now())
-        document = content_collection.insert_one(data)
+        # document = content_collection.insert_one(data)
         return jsonify({"msg": "Image processed successfully"}), 201
 
 @app.route('/text', methods=['POST'])
