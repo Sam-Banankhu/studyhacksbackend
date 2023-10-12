@@ -45,13 +45,13 @@ import functools
 from flask import jsonify
 
 
-
+# GETTING DOCUMENTATION 
 @app.route('/')
-
 def index():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], "studyhacks-docs.pdf")
     return send_file(file_path)
 
+# REGISTERATING A USER
 @app.route('/register', methods=['POST'])
 def register_user():
     data = request.get_json()
@@ -95,6 +95,8 @@ def register_user():
 
     return jsonify({'msg': 'User registered successfully'}), 201
 
+
+# LOGINING IN A USER
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -111,6 +113,7 @@ def login():
     token =get_token(user["_id"])
     return jsonify({'msg': 'Login successful', 'access_token': token, 'user': user}), 200
 
+# GETTING USERS
 @app.route('/users', methods=['GET'])
 def get_all_users():
     res= authorise_request(request)
@@ -128,6 +131,7 @@ def get_all_users():
             user['_id'] = str(user['_id'])
         return jsonify(users), 200
 
+# GETTING A USER
 @app.route('/users/<string:user_id>', methods=['GET'])
 def get_single_user(user_id):
     res= authorise_request(request)
@@ -148,6 +152,7 @@ def get_single_user(user_id):
 
         return jsonify(user), 200
 
+# LOGGING OUT USER
 @app.route('/logout', methods=['POST'])
 def logout():
     res= authorise_request(request)
@@ -162,25 +167,29 @@ def logout():
             return jsonify({'msg': 'Logged out successfully'}), 200
         else:
             return jsonify({'msg': 'Logged out not successful'}), 200
-@app.route('/users/<string:_id>', methods=['GET'])
-def get_user(_id):
-    res= authorise_request(request)
-    if(res=="expired"):
-        return jsonify({"message": "Token expired"}), 403
-    elif (res=="invalid"):
-        return jsonify({"message": "Token is invalid"}),403
-    elif(res=="not found"):
-        return jsonify({"message": "Token not found"}),403
-    elif(res=="revoked"):
-        return jsonify({"message": "Token is revoked"}),403
-    else:
-        user = users_collection.find_one({'_id': _id})
-        if user:
-            user['_id'] = str(user['_id'])
-            return jsonify(user), 200
-        else:
-            return jsonify({'message': 'User not found'}), 404
+        
+        
+# @app.route('/users/<string:_id>', methods=['GET'])
+# def get_user(_id):
+#     res= authorise_request(request)
+#     if(res=="expired"):
+#         return jsonify({"message": "Token expired"}), 403
+#     elif (res=="invalid"):
+#         return jsonify({"message": "Token is invalid"}),403
+#     elif(res=="not found"):
+#         return jsonify({"message": "Token not found"}),403
+#     elif(res=="revoked"):
+#         return jsonify({"message": "Token is revoked"}),403
+#     else:
+#         user = users_collection.find_one({'_id': _id})
+#         if user:
+#             user['_id'] = str(user['_id'])
+#             return jsonify(user), 200
+#         else:
+#             return jsonify({'message': 'User not found'}), 404
 
+
+# CHANGE pASWORD
 @app.route('/change_password', methods=['POST'])
 def change_password():
     res= authorise_request(request)
@@ -208,43 +217,8 @@ def change_password():
 
         return jsonify({'msg': 'Password updated successfully'}), 200
 
-# @app.route('/pdfs', methods=['POST'])
-# def upload_pdf():
-#     res= authorise_request(request)
-#     if(res=="expired"):
-#         return jsonify({"message": "Token expired"}), 403
-#     elif (res=="invalid"):
-#         return jsonify({"message": "Token is invalid"}),403
-#     elif(res=="not found"):
-#         return jsonify({"message": "Token not found"}),403
-#     elif(res=="revoked"):
-#         return jsonify({"message": "Token is revoked"}),403
-#     else:
-        # # id=res["id"]
-        # if 'file' not in request.files:
-        #     return "No file part", 400
 
-        # file = request.files['file']
-        # if file.filename == '':
-        #     return "No selected file", 400
-
-        # unique_id = uuid.uuid4()
-        # _id = str(ObjectId())
-        # pdf_loc = os.path.join(app.config['UPLOAD_FOLDER'], str(unique_id) + ".pdf")
-        # # file.save(pdf_loc)
-        # extracted_text = extract_text_from_pdf(pdf_loc)
-        # data = {}
-        # data['user_id'] = id
-        # data['type_'] = 'pdf'
-        # data["extracted_text"] = extracted_text
-        # data["name"] = str(unique_id) + ".pdf"
-        # data["chat_ids"] = []
-        # data["_id"] = _id
-        # data["path"] = backend_url + '/files/download/' + _id
-        # data['timestamp'] = str(datetime.now())
-        # document = content_collection.insert_one(data)
-        # return jsonify({"msg": "Document processed successfully"}), 201
-
+# UpLOAD pDF
 @app.route('/pdfs', methods=['POST'])
 def upload_pdf():
     res= authorise_request(request)
@@ -284,6 +258,8 @@ def upload_pdf():
         document = content_collection.insert_one(data)
         return jsonify({"msg": "Document processed successfully"}),201
 
+
+# UpLOADING IMAGES
 @app.route('/images', methods=['POST'])
 def upload_image():
     res= authorise_request(request)
@@ -322,6 +298,7 @@ def upload_image():
         document = content_collection.insert_one(data)
         return jsonify({"msg": "Document processed successfully"}),201
 
+# UpLOADING TEXT documents
 @app.route('/text', methods=['POST'])
 def upload_text():
     res= authorise_request(request)
@@ -351,6 +328,7 @@ def upload_text():
         document = content_collection.insert_one(data)
         return jsonify({"msg": "Text processed successfully"}), 201
 
+# retrieve all text documents
 @app.route('/text', methods=['GET'])
 def get_files():
     res= authorise_request(request)
@@ -372,6 +350,7 @@ def get_files():
 
         return jsonify(files_list), 200
     
+    # retrive one text document
 @app.route('/text/<text_id>', methods=['GET'])
 def get_text(text_id):
     res = authorise_request(request)
@@ -390,7 +369,8 @@ def get_text(text_id):
             return jsonify(document), 200
         else:
             return jsonify({"message": "Text document not found"}), 404
-        
+
+# retrive all psf documents  
 @app.route('/pdfs', methods=['GET'])
 def get_pdfs():
     res= authorise_request(request)
@@ -412,6 +392,7 @@ def get_pdfs():
 
         return jsonify(files_list), 200
 
+# retrieve one pdf document 
 @app.route('/pdfs/<pdf_id>', methods=['GET'])
 def get_pdf(pdf_id):
     res = authorise_request(request)
@@ -430,6 +411,30 @@ def get_pdf(pdf_id):
             return jsonify(document), 200
         else:
             return jsonify({"message": "PDF not found"}), 404
+from flask import request
+
+
+# delete one pdf document
+@app.route('/pdfs/<pdf_id>', methods=['DELETE'])
+def delete_pdf(pdf_id):
+    res = authorise_request(request)
+    if res == "expired":
+        return jsonify({"message": "Token expired"}), 403
+    elif res == "invalid":
+        return jsonify({"message": "Token is invalid"}), 403
+    elif res == "not found":
+        return jsonify({"message": "Token not found"}), 403
+    elif res == "revoked":
+        return jsonify({"message": "Token is revoked"}), 403
+    else:
+        # Add code here to delete the PDF document with the specified pdf_id
+        result = content_collection.delete_one({"_id": pdf_id, "type_": "pdf"})
+        if result.deleted_count > 0:
+            return jsonify({"message": "PDF document deleted successfully"}), 200
+        else:
+            return jsonify({"message": "PDF not found for deletion"}), 404
+
+#  get all imag documents 
 @app.route('/images', methods=['GET'])
 def get_images():
     res= authorise_request(request)
@@ -452,6 +457,7 @@ def get_images():
 
         return jsonify(files_list), 200
 
+# getting all documents
 @app.route('/pdf_images_text', methods=['GET'])
 def get_all_contents():
     res= authorise_request(request)
@@ -471,6 +477,7 @@ def get_all_contents():
             files_list.append(document)
         return jsonify(files_list), 200
 
+# download documents
 @app.route('/files/download/<_id>', methods=['GET'])
 def download_file(_id):
     document = content_collection.find_one({"_id": _id})
@@ -481,6 +488,7 @@ def download_file(_id):
     else:
         return jsonify({"msg": "File not found"}), 404
 
+# create a chat message
 @app.route("/chats/<string:pdf_id>", methods=["POST"])
 def create_chat(pdf_id):
     res= authorise_request(request)
@@ -518,6 +526,7 @@ def create_chat(pdf_id):
             {"$push": {"chat_ids": _id}})
         return jsonify({"msg": "Chat created successfully", 'chat': data}), 201
 
+# create a sammary from pdf
 @app.route("/sammary/<string:pdf_id>", methods=["POST"])
 def create_sammary1(pdf_id):
     res= authorise_request(request)
@@ -557,6 +566,35 @@ def create_sammary1(pdf_id):
         }
         return jsonify(response_data), 201
 
+# saving sammaries 
+@app.route("/sammary/save", methods=["POST"])
+def save_sammary1():
+        data = request.get_json()
+        print(data)
+        sammary=data["sammary"]
+        type=data["type"]
+        pdf_id=data["pdf_id"]
+        sammary=data["sammary"]
+        sammary=data["sammary"]
+        time = str(datetime.now())
+        timestamp= time
+        _id = str(ObjectId())
+        user_id= data["user_id"]
+        data = {
+            'sammary': sammary,
+            "type_": type,
+            "pdf_id": pdf_id,
+            'timestamp': timestamp,
+            '_id': _id,
+            'user_id': user_id
+        }
+        sammary = sammaries_collection.insert_one(data)
+        response_data = {
+            "msg": "sammary successfully"
+        }
+        return jsonify(response_data), 201
+
+# create sammaries from text data
 @app.route("/sammary", methods=["POST"])
 def create_sammary():
     res= authorise_request(request)
@@ -590,13 +628,14 @@ def create_sammary():
             '_id': _id,
             'user_id': user_id
         }
-        sammary = sammaries_collection.insert_one(data)
+        # sammary = sammaries_collection.insert_one(data)
         response_data = {
             "msg": "Summary created successfully",
             "sammary": answer
         }
         return jsonify(response_data), 201
 
+# get all chats
 @app.route("/chats", methods=["GET"])
 def get_all_chats():
     res= authorise_request(request)
@@ -613,6 +652,7 @@ def get_all_chats():
         chat_list = [chat for chat in chats]
         return jsonify(chat_list), 200
 
+# getting all sammaries
 @app.route("/sammary", methods=["GET"])
 def get_summaries():
     res= authorise_request(request)
@@ -626,21 +666,41 @@ def get_summaries():
         return jsonify({"message": "Token is revoked"}),403
     else:
         sammaries = list(sammaries_collection.find())
-        sammary_list = []
-        for sammary in sammaries:
-            formatted_sammary = {
-                "type": sammary["type"],
-                "sammary_id": str(sammary["_id"]),
-                "sammary": sammary["sammary"],
-                "pdf_id": sammary["pdf_id"],
-                "timestamp": sammary["timestamp"],
-                "user_id": sammary["user_id"]
-            }
-            sammary_list.append(formatted_sammary)
+        # sammary_list = []
+        # for sammary in sammaries:
+        #     formatted_sammary = {
+        #         "type": sammary["type"],
+        #         "sammary_id": str(sammary["_id"]),
+        #         "sammary": sammary["sammary"],
+        #         "pdf_id": sammary["pdf_id"],
+        #         "timestamp": sammary["timestamp"],
+        #         "user_id": sammary["user_id"]
+        #     }
+        #     sammary_list.append(formatted_sammary)
         response_data = {
-            "summaries": sammary_list
+            "summaries": sammaries
         }
         return jsonify(response_data), 200
+from flask import request
+
+# delete one sammary
+@app.route("/sammary/<summary_id>", methods=["DELETE"])
+def delete_summary(sammary_id):
+    res = authorise_request(request)
+    if res == "expired":
+        return jsonify({"message": "Token expired"}), 403
+    elif res == "invalid":
+        return jsonify({"message": "Token is invalid"}), 403
+    elif res == "not found":
+        return jsonify({"message": "Token not found"}), 403
+    elif res == "revoked":
+        return jsonify({"message": "Token is revoked"}), 403
+    else:
+        # Add code here to delete a specific summary by summary_id
+        # You can use 
+        sammaries_collection.delete_one({"_id": sammary_id})
+        # Return an appropriate response based on the success or failure of the deletion
+        return jsonify({"message": "Sammary deleted successfully"}), 200
 
 @app.route("/sammaries/pdfs/<string:pdf_id>", methods=["GET"])
 def get_summaries_by_pdf_id(pdf_id):
@@ -670,6 +730,7 @@ def get_summaries_by_pdf_id(pdf_id):
         }
         return jsonify(response_data), 200
 
+# getting all chats
 @app.route("/chats", methods=["GET"])
 def get_chats():
     res= authorise_request(request)
@@ -688,6 +749,7 @@ def get_chats():
             chat["_id"] = str(chat["_id"])
         return jsonify(chats), 200
 
+# getting all chats under pdf
 @app.route("/chats/pdfs/<string:pdf_id>", methods=["GET"])
 def get_chats_by_pdf_id(pdf_id):
     res= authorise_request(request)
@@ -707,6 +769,7 @@ def get_chats_by_pdf_id(pdf_id):
             formatted_chats.append(chat)
         return jsonify(formatted_chats), 200
 
+# getting specific chat
 @app.route("/chats/<string:chat_id>", methods=["GET"])
 def get_chat(chat_id):
     res= authorise_request(request)
@@ -747,6 +810,7 @@ def update_chat(chat_id):
         else:
             return jsonify({"msg": "Chat not found"}), 404
 
+# delete chat
 @app.route("/chats/<string:chat_id>", methods=["DELETE"])
 def delete_chat(chat_id):
     res= authorise_request(request)
