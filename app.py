@@ -265,7 +265,7 @@ def upload_pdf():
         
         if file.filename == '':
             return "No selected file", 400
-        
+        original_name=file.filename
         unique_id = uuid.uuid4()
         _id = str(ObjectId())
         pdf_loc=os.path.join(app.config['UPLOAD_FOLDER'],  str(unique_id)+".pdf")
@@ -276,6 +276,7 @@ def upload_pdf():
         data['type_']='pdf'
         data["extracted_text"]=extracted_text
         data["name"]=str(unique_id)+".pdf"
+        data["original_name"]=original_name
         data["chat_ids"]=[]
         data["_id"]=_id
         data["path"]=backend_url+'/files/download/'+_id
@@ -295,31 +296,31 @@ def upload_image():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        # id=res["id"]
+        user_id=res["id"]
         if 'file' not in request.files:
             return "No file part", 400
-
+        
         file = request.files['file']
-
+        
         if file.filename == '':
             return "No selected file", 400
-
+        
         unique_id = uuid.uuid4()
         _id = str(ObjectId())
-        pdf_loc = os.path.join(app.config['UPLOAD_FOLDER'], str(unique_id) + file.filename)
+        pdf_loc=os.path.join(app.config['UPLOAD_FOLDER'],  str(unique_id)+".pdf")
         file.save(pdf_loc)
-        extracted_text = extract_text_from_image(pdf_loc)
+        extracted_text = extract_text_from_pdf(pdf_loc)
         data = {}
-        data['user_id'] = id
-        data['type_'] = 'image'
-        data["extracted_text"] = extracted_text
-        data["name"] = str(unique_id) + file.filename
-        data["chat_ids"] = []
-        data["_id"] = _id
-        data["path"] = backend_url + '/files/download/' + _id
-        data['timestamp'] = str(datetime.now())
-        # document = content_collection.insert_one(data)
-        return jsonify({"msg": "Image processed successfully"}), 201
+        data['user_id']=user_id
+        data['type_']='pdf'
+        data["extracted_text"]=extracted_text
+        data["name"]=str(unique_id)+".pdf"
+        data["chat_ids"]=[]
+        data["_id"]=_id
+        data["path"]=backend_url+'/files/download/'+_id
+        data['timestamp']=str(datetime.now())
+        document = content_collection.insert_one(data)
+        return jsonify({"msg": "Document processed successfully"}),201
 
 @app.route('/text', methods=['POST'])
 def upload_text():
@@ -370,7 +371,26 @@ def get_files():
                 files_list.append(document)
 
         return jsonify(files_list), 200
-
+    
+@app.route('/text/<text_id>', methods=['GET'])
+def get_text(text_id):
+    res = authorise_request(request)
+    if res == "expired":
+        return jsonify({"message": "Token expired"}), 403
+    elif res == "invalid":
+        return jsonify({"message": "Token is invalid"}), 403
+    elif res == "not found":
+        return jsonify({"message": "Token not found"}), 403
+    elif res == "revoked":
+        return jsonify({"message": "Token is revoked"}), 403
+    else:
+        document = content_collection.find_one({"_id": text_id, "type_": "text"})
+        if document:
+            document["_id"] = str(document["_id"])
+            return jsonify(document), 200
+        else:
+            return jsonify({"message": "Text document not found"}), 404
+        
 @app.route('/pdfs', methods=['GET'])
 def get_pdfs():
     res= authorise_request(request)
@@ -392,6 +412,24 @@ def get_pdfs():
 
         return jsonify(files_list), 200
 
+@app.route('/pdfs/<pdf_id>', methods=['GET'])
+def get_pdf(pdf_id):
+    res = authorise_request(request)
+    if res == "expired":
+        return jsonify({"message": "Token expired"}), 403
+    elif res == "invalid":
+        return jsonify({"message": "Token is invalid"}), 403
+    elif res == "not found":
+        return jsonify({"message": "Token not found"}), 403
+    elif res == "revoked":
+        return jsonify({"message": "Token is revoked"}), 403
+    else:
+        document = content_collection.find_one({"_id": pdf_id, "type_": "pdf"})
+        if document:
+            document["_id"] = str(document["_id"])
+            return jsonify(document), 200
+        else:
+            return jsonify({"message": "PDF not found"}), 404
 @app.route('/images', methods=['GET'])
 def get_images():
     res= authorise_request(request)
