@@ -11,6 +11,7 @@ import uuid
 import os
 revoked_tokens = []
 import PyPDF2
+from time import sleep
 from flask_bcrypt import Bcrypt
 
 import openai
@@ -316,11 +317,13 @@ def upload_text():
         text = data['text']
         unique_id = uuid.uuid4()
         _id = str(ObjectId())
-        data = {}
+        data = {}  
+        answer1 = f'{text[:25]}...'
         data['user_id'] = user_id
         data['type_'] = 'text'
         data["extracted_text"] = text
         data["name"] = ''
+        data["title"] = answer1
         data["chat_ids"] = []
         data["_id"] = _id
         data["path"] = ""
@@ -343,13 +346,7 @@ def get_files():
     else:
         user_id=res["id"]
         documents_list = list(content_collection.find({"user_id":user_id, "type_": "text"}))
-        files_list = []
-        for document in documents_list:
-            if document["type_"] == 'text':
-                document["_id"] = str(document["_id"])
-                files_list.append(document)
-
-        return jsonify(files_list), 200
+        return jsonify(documents_list), 200
     
     # retrive one text document
 @app.route('/text/<text_id>', methods=['GET'])
@@ -367,7 +364,6 @@ def get_text(text_id):
         user_id=res["id"]
         document = content_collection.find_one({"_id": text_id,"user_id":user_id, "type_": "text"})
         if document:
-            document["_id"] = str(document["_id"])
             return jsonify(document), 200
         else:
             return jsonify({"message": "Text document not found"}), 404
@@ -386,14 +382,8 @@ def get_pdfs():
         return jsonify({"message": "Token is revoked"}),403
     else:
         user_id=res["id"]
-        documents_list = list(content_collection.find({"user_id":user_id}))
-        files_list = []
-        for document in documents_list:
-            if document["type_"] == 'pdf':
-                document["_id"] = str(document["_id"])
-                files_list.append(document)
-
-        return jsonify(files_list), 200
+        documents_list = list(content_collection.find({"user_id":user_id,"type_": "pdf"}))
+        return jsonify(documents_list), 200
 
 # retrieve one pdf document 
 @app.route('/pdfs/<pdf_id>', methods=['GET'])
@@ -411,7 +401,6 @@ def get_pdf(pdf_id):
         print(res)
         document = content_collection.find_one({"_id": pdf_id, "type_": "pdf"})
         if document:
-            document["_id"] = str(document["_id"])
             return jsonify(document), 200
         else:
             return jsonify({"message": "PDF not found"}), 404
@@ -452,15 +441,8 @@ def get_images():
         return jsonify({"message": "Token is revoked"}),403
     else:
         user_id=res["id"]
-        documents_list = list(content_collection.find({"user_id":user_id}))
-        files_list = []
-
-        for document in documents_list:
-            if document["type_"] == 'image':
-                document["_id"] = str(document["_id"])
-                files_list.append(document)
-
-        return jsonify(files_list), 200
+        documents_list = list(content_collection.find({"user_id":user_id,"type_": "image"}))
+        return jsonify(documents_list), 200
 
 # getting all documents
 @app.route('/pdf_images_text', methods=['GET'])
@@ -476,11 +458,7 @@ def get_all_contents():
         return jsonify({"message": "Token is revoked"}),403
     else:
         documents_list = list(content_collection.find({"user_id":res["id"]}))
-        files_list = []
-        for document in documents_list:
-            document["_id"] = str(document["_id"])
-            files_list.append(document)
-        return jsonify(files_list), 200
+        return jsonify(documents_list), 200
 
 # download documents
 @app.route('/files/download/<_id>', methods=['GET'])
@@ -508,6 +486,7 @@ def create_chat(pdf_id):
     else:
         user_id=res["id"]
         data = request.get_json()
+        print(data)
         question = data["question"]
         document = content_collection.find_one({"_id": pdf_id})
         context = document['extracted_text']
@@ -518,7 +497,10 @@ def create_chat(pdf_id):
         )
         _id = str(ObjectId())
         answer = response.choices[0].text.strip()
+        answer1 = f'{context[:25]}...'
+        answer = response.choices[0].text.strip()
         data['answer'] = answer
+        data['title'] = answer1
         data['question'] = question
         data["pdf_id"] = document["_id"]
         data['type_'] = 'pdf'
@@ -554,13 +536,18 @@ def create_sammary1(pdf_id):
             prompt=f"Context: {context}\nQuestion: {question}\nAnswer:",
             max_tokens=50
         )
+        _id = str(ObjectId())
+        
+        
         answer = response.choices[0].text.strip()
+        answer1 = f'{context[:25]}...'
         time = str(datetime.now())
         data = {
             'sammary': answer,
             "type": "pdf",
             "prompt":context,
             "pdf_id": str(document["_id"]),
+            "title": answer1,
             'timestamp': time,
             '_id': _id,
             'user_id': user_id
@@ -582,10 +569,11 @@ def save_sammary1():
         prompt=data["prompt"]
         time = str(datetime.now())
         timestamp= time
-        
+        title= data["title"]
         _id = str(ObjectId())
         user_id= data["user_id"]
         data = {
+            "title": title,
             'sammary': sammary,
             "type_": type,
             "pdf_id": pdf_id,
@@ -596,7 +584,7 @@ def save_sammary1():
         }
         sammary = sammaries_collection.insert_one(data)
         response_data = {
-            "msg": "sammary successfully"
+            "msg": "sammary created successfully"
         }
         return jsonify(response_data), 201
 
@@ -625,16 +613,21 @@ def create_sammary():
             max_tokens=50
         )
         answer = response.choices[0].text.strip()
+        answer1 = f'{context[:25]}...'
         time = str(datetime.now())
         data = {
             'sammary': answer,
             "pdf_id": "",
-            "type": "pdf",
+            "title": answer1,
+            "type_": "text",
             "prompt":text,
             'timestamp': time,
             '_id': _id,
-            'user_id': user_id
+            'user_id': user_id,
+    
         }
+       
+            
         # sammary = sammaries_collection.insert_one(data)
         response_data = {
             "msg": "Summary created successfully",
@@ -797,7 +790,6 @@ def update_chat(chat_id):
             return jsonify({"msg": "Chat updated successfully"}), 200
         else:
             return jsonify({"msg": "Chat not found"}), 404
-
 # delete chat
 @app.route("/chats/<string:chat_id>", methods=["DELETE"])
 def delete_chat(chat_id):
@@ -867,4 +859,4 @@ def revoke_token(token):
         print()
         return "revoked"
 if __name__ == "__main__":
-    serve(app, host="0.0.0.0", port=8085)
+    serve(app, host="0.0.0.0", port=8080)
