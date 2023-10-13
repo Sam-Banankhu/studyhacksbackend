@@ -341,7 +341,8 @@ def get_files():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        documents_list = list(content_collection.find())
+        user_id=res["id"]
+        documents_list = list(content_collection.find({"user_id":user_id, "type_": "text"}))
         files_list = []
         for document in documents_list:
             if document["type_"] == 'text':
@@ -363,7 +364,8 @@ def get_text(text_id):
     elif res == "revoked":
         return jsonify({"message": "Token is revoked"}), 403
     else:
-        document = content_collection.find_one({"_id": text_id, "type_": "text"})
+        user_id=res["id"]
+        document = content_collection.find_one({"_id": text_id,"user_id":user_id, "type_": "text"})
         if document:
             document["_id"] = str(document["_id"])
             return jsonify(document), 200
