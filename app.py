@@ -256,7 +256,7 @@ def upload_pdf():
         data["path"]=backend_url+'/files/download/'+_id
         data['timestamp']=str(datetime.now())
         document = content_collection.insert_one(data)
-        return jsonify({"msg": "Document processed successfully"}),201
+        return jsonify({"msg": "Document processed successfully","id":document.inserted_id}),201
 
 
 # UpLOADING IMAGES
