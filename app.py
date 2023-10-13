@@ -383,7 +383,8 @@ def get_pdfs():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        documents_list = list(content_collection.find())
+        user_id=res["id"]
+        documents_list = list(content_collection.find({"user_id":user_id}))
         files_list = []
         for document in documents_list:
             if document["type_"] == 'pdf':
@@ -405,6 +406,7 @@ def get_pdf(pdf_id):
     elif res == "revoked":
         return jsonify({"message": "Token is revoked"}), 403
     else:
+        print(res)
         document = content_collection.find_one({"_id": pdf_id, "type_": "pdf"})
         if document:
             document["_id"] = str(document["_id"])
@@ -447,7 +449,8 @@ def get_images():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        documents_list = list(content_collection.find())
+        user_id=res["id"]
+        documents_list = list(content_collection.find({"user_id":user_id}))
         files_list = []
 
         for document in documents_list:
@@ -470,7 +473,7 @@ def get_all_contents():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        documents_list = list(content_collection.find())
+        documents_list = list(content_collection.find({"user_id":res["id"]}))
         files_list = []
         for document in documents_list:
             document["_id"] = str(document["_id"])
@@ -554,6 +557,7 @@ def create_sammary1(pdf_id):
         data = {
             'sammary': answer,
             "type": "pdf",
+            "prompt":context,
             "pdf_id": str(document["_id"]),
             'timestamp': time,
             '_id': _id,
@@ -570,14 +574,13 @@ def create_sammary1(pdf_id):
 @app.route("/sammary/save", methods=["POST"])
 def save_sammary1():
         data = request.get_json()
-        print(data)
         sammary=data["sammary"]
         type=data["type"]
         pdf_id=data["pdf_id"]
-        sammary=data["sammary"]
-        sammary=data["sammary"]
+        prompt=data["prompt"]
         time = str(datetime.now())
         timestamp= time
+        
         _id = str(ObjectId())
         user_id= data["user_id"]
         data = {
@@ -586,7 +589,8 @@ def save_sammary1():
             "pdf_id": pdf_id,
             'timestamp': timestamp,
             '_id': _id,
-            'user_id': user_id
+            'user_id': user_id,
+            "prompt":prompt
         }
         sammary = sammaries_collection.insert_one(data)
         response_data = {
@@ -624,6 +628,7 @@ def create_sammary():
             'sammary': answer,
             "pdf_id": "",
             "type": "pdf",
+            "prompt":text,
             'timestamp': time,
             '_id': _id,
             'user_id': user_id
@@ -631,7 +636,7 @@ def create_sammary():
         # sammary = sammaries_collection.insert_one(data)
         response_data = {
             "msg": "Summary created successfully",
-            "sammary": answer
+            "sammary": answer,"prompt":text
         }
         return jsonify(response_data), 201
 
@@ -648,7 +653,7 @@ def get_all_chats():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        chats = chats_collection.find({})
+        chats = chats_collection.find({"user_id":res["id"]})
         chat_list = [chat for chat in chats]
         return jsonify(chat_list), 200
 
@@ -665,7 +670,7 @@ def get_summaries():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
-        sammaries = list(sammaries_collection.find())
+        sammaries = list(sammaries_collection.find({"user_id":res["id"]}))
         # sammary_list = []
         # for sammary in sammaries:
         #     formatted_sammary = {
@@ -715,20 +720,7 @@ def get_summaries_by_pdf_id(pdf_id):
         return jsonify({"message": "Token is revoked"}),403
     else:
         chats = list(sammaries_collection.find({"pdf_id": pdf_id}))
-        sammary_list = []
-        for sammary in chats:
-            formatted_sammary = {
-                "sammary_id": str(sammary["_id"]),
-                "sammary": sammary["sammary"],
-                "pdf_id": sammary["pdf_id"],
-                "timestamp": sammary["timestamp"],
-                "user_id": sammary["user_id"]
-            }
-            sammary_list.append(formatted_sammary)
-        response_data = {
-            "sammaries": sammary_list
-        }
-        return jsonify(response_data), 200
+        return jsonify(chats), 200
 
 # getting all chats
 @app.route("/chats", methods=["GET"])
@@ -745,8 +737,6 @@ def get_chats():
     else:
         user_id =res["id"]
         chats = list(chats_collection.find({'user_id': user_id}))
-        for chat in chats:
-            chat["_id"] = str(chat["_id"])
         return jsonify(chats), 200
 
 # getting all chats under pdf
@@ -763,11 +753,7 @@ def get_chats_by_pdf_id(pdf_id):
         return jsonify({"message": "Token is revoked"}),403
     else:
         chats = list(chats_collection.find({"pdf_id": pdf_id}))
-        formatted_chats = []
-        for chat in chats:
-            chat["_id"] = str(chat["_id"])
-            formatted_chats.append(chat)
-        return jsonify(formatted_chats), 200
+        return jsonify(chats), 200
 
 # getting specific chat
 @app.route("/chats/<string:chat_id>", methods=["GET"])
