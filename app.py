@@ -562,6 +562,16 @@ def create_sammary1(pdf_id):
 # saving sammaries 
 @app.route("/sammary/save", methods=["POST"])
 def save_sammary1():
+    res= authorise_request(request)
+    if(res=="expired"):
+        return jsonify({"message": "Token expired"}), 403
+    elif (res=="invalid"):
+        return jsonify({"message": "Token is invalid"}),403
+    elif(res=="not found"):
+        return jsonify({"message": "Token not found"}),403
+    elif(res=="revoked"):
+        return jsonify({"message": "Token is revoked"}),403
+    else:
         data = request.get_json()
         sammary=data["sammary"]
         type=data["type"]
@@ -571,7 +581,7 @@ def save_sammary1():
         timestamp= time
         title= data["title"]
         _id = str(ObjectId())
-        user_id= data["user_id"]
+        user_id= res["id"]
         data = {
             "title": title,
             'sammary': sammary,
@@ -665,6 +675,7 @@ def get_summaries():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
+        print(res)
         sammaries = list(sammaries_collection.find({"user_id":res["id"]}))
         # sammary_list = []
         # for sammary in sammaries:
@@ -859,4 +870,4 @@ def revoke_token(token):
         print()
         return "revoked"
 if __name__ == "__main__":
-    serve(app, host="0.0.0.0", port=8080)
+    serve(app, host="0.0.0.0", port=8085)
