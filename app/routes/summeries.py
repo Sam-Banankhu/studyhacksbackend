@@ -1,6 +1,9 @@
-from app import app, Flask, request, session, redirect, jsonify, ObjectId, openai, datetime, timedelta, time
+from app import app, Flask, request, jsonify, ObjectId, openai, datetime, timedelta, time
 from auth import *
 from app.models import *
+
+
+
 
 # create a sammary from pdf
 @app.route("/sammary/<string:pdf_id>", methods=["POST"])
@@ -48,6 +51,8 @@ def create_sammary1(pdf_id):
         }
         return jsonify(response_data), 201
 
+
+
 # saving sammaries 
 @app.route("/sammary/save", methods=["POST"])
 def save_sammary1():
@@ -89,6 +94,9 @@ def save_sammary1():
             "msg": "sammary created successfully"
         }
         return jsonify(response_data), 201
+
+
+
 
 # create sammaries from text data
 @app.route("/sammary", methods=["POST"])
@@ -169,7 +177,9 @@ def get_summaries():
             "summaries": sammaries
         }
         return jsonify(response_data), 200
-from flask import request
+
+
+
 
 # delete one sammary
 @app.route("/sammary/<summary_id>", methods=["DELETE"])
@@ -189,6 +199,8 @@ def delete_summary(sammary_id):
         sammaries_collection.delete_one({"_id": sammary_id})
         # Return an appropriate response based on the success or failure of the deletion
         return jsonify({"message": "Sammary deleted successfully"}), 200
+
+
 
 @app.route("/sammaries/pdfs/<string:pdf_id>", methods=["GET"])
 def get_summaries_by_pdf_id(pdf_id):
