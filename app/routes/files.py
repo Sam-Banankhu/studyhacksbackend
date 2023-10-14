@@ -1,7 +1,7 @@
-from app import app, jsonify, ObjectId, uuid, datetime
+from app import app, jsonify, ObjectId, uuid, datetime, Image, PyPDF2, pytesseract, backend_url, send_file
 import os
 from auth import authorise_request, jwt, secret_key, algorithm
-
+from app.models import *
 
 def extract_text_from_pdf(pdf_file_path):
     try:
