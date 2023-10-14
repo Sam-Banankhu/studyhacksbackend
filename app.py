@@ -562,6 +562,7 @@ def create_sammary1(pdf_id):
 # saving sammaries 
 @app.route("/sammary/save", methods=["POST"])
 def save_sammary1():
+    
     res= authorise_request(request)
     if(res=="expired"):
         return jsonify({"message": "Token expired"}), 403
@@ -572,6 +573,7 @@ def save_sammary1():
     elif(res=="revoked"):
         return jsonify({"message": "Token is revoked"}),403
     else:
+        
         data = request.get_json()
         sammary=data["sammary"]
         type=data["type"]
@@ -579,11 +581,11 @@ def save_sammary1():
         prompt=data["prompt"]
         time = str(datetime.now())
         timestamp= time
-        title= data["title"]
         _id = str(ObjectId())
         user_id= res["id"]
+        answer1 = f'{prompt[:25]}...'
         data = {
-            "title": title,
+            "title": answer1,
             'sammary': sammary,
             "type_": type,
             "pdf_id": pdf_id,
@@ -592,6 +594,7 @@ def save_sammary1():
             'user_id': user_id,
             "prompt":prompt
         }
+        
         sammary = sammaries_collection.insert_one(data)
         response_data = {
             "msg": "sammary created successfully"
