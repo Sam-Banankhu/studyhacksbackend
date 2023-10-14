@@ -1,6 +1,8 @@
 from app import app, request, datetime, jsonify, ObjectId, bcrypt
-from auth import get_token, authorise_request, jwt, revoke_token
+from app.routes.auth import get_token, authorise_request, jwt, revoke_token
 from app.models import *
+
+
 
 # REGISTERATING A USER
 @app.route('/register', methods=['POST'])

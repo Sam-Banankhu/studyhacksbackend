@@ -1,5 +1,5 @@
 from app import app, Flask, request, jsonify, ObjectId, openai, datetime, timedelta, time
-from auth import *
+from app.routes.auth import *
 from app.models import *
 
 

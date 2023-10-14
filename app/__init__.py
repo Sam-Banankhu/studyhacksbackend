@@ -36,3 +36,6 @@ bcrypt = Bcrypt(app)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+from app import models
+from app.routes import *
+

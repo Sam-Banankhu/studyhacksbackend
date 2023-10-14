@@ -1,6 +1,6 @@
 from app import app, jsonify, request, openai, ObjectId, datetime
 from app.models import chats_collection, content_collection
-from auth import *
+from app.routes.auth import *
 
 
 # create a chat message
