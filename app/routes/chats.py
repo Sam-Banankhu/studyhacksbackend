@@ -1,4 +1,5 @@
-from app import app, jsonify, request, openai, ObjectId, datetime
+from app import app, jsonify, request, openai, ObjectId
+from datetime import datetime
 from app.models import chats_collection, content_collection
 from app.routes.auth import *
 

@@ -1,4 +1,5 @@
-from app import app, request, datetime, jsonify, ObjectId, bcrypt
+from app import app, request, jsonify, ObjectId, bcrypt
+from datetime import datetime
 from app.routes.auth import get_token, authorise_request, jwt, revoke_token
 from app.models import *
 
