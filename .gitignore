@@ -1,0 +1,51 @@
+# Python-specific
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+*.pyc
+*.pyo
+*.pyd
+
+# Compiled Python files
+*.pyc
+
+# IDE-specific
+.idea/
+.vscode/
+
+# Editor/OS metadata
+*.swp
+.DS_Store
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Build and package files
+*.log
+*.tar.gz
+*.tgz
+*.zip
+*.bzip
+*.gzip
+*.jar
+
+# Local settings
+*.env
+*.sql
+*.sqlite
+
+# Ignore these files if you're using Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Ignore uploaded files or user-generated content
+uploads/
